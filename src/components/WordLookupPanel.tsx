@@ -199,7 +199,7 @@ export function WordLookupPanel({
                   {data.synonyms.synonyms.map((synonym, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full"
+                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
                     >
                       {synonym}
                     </span>
@@ -207,12 +207,9 @@ export function WordLookupPanel({
                 </div>
               </div>
             ) : (
-              <div className="text-center py-4">
-                <p className="text-gray-500">
-                  「{word}」の類語が見つかりませんでした。
-                </p>
-              </div>
+              <p className="text-gray-500 text-center py-4">類語が見つかりませんでした。</p>
             )}
+
             {data.synonyms.antonyms && data.synonyms.antonyms.length > 0 && (
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">対義語</h4>
@@ -220,7 +217,7 @@ export function WordLookupPanel({
                   {data.synonyms.antonyms.map((antonym, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-red-50 text-red-700 text-sm rounded-full"
+                      className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm"
                     >
                       {antonym}
                     </span>
@@ -230,6 +227,32 @@ export function WordLookupPanel({
             )}
           </div>
         )}
+      </div>
+
+      {/* ライセンス表示 */}
+      <div className="border-t border-gray-200 p-3 bg-gray-50">
+        <div className="text-xs text-gray-500 space-y-1">
+          <p>
+            <a 
+              href="https://bond-lab.github.io/wnja/index.ja.html" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              日本語ワードネット（v1.1）© 2009-2011 NICT, 2012-2015 Francis Bond and 2016-2024 Francis Bond, Takayuki Kuribayashi
+            </a>
+          </p>
+          <p>
+            <a 
+              href="https://api.datamuse.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              English WordNet data provided by Datamuse API
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

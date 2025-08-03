@@ -1,99 +1,258 @@
 # WordTree
 
-ブラウザ上でユーザが自由に文章を入力／ペーストし、任意の単語を選択すると、その単語に対応する多言語訳・類語・語源を即座に取得し、直感的に可視化できる軽量Webアプリケーションです。
+ブラウザ上でユーザーが自由に文章を入力し、任意の単語を選択すると、その単語に対応する辞書的な意味と類語を即座に取得し、直感的に可視化できる軽量Webアプリケーションです。
 
 ## 機能
 
-- **テキスト入力領域**: リッチテキストエリアでテキストを入力・ペースト
-- **単語選択検知**: クリック／ドラッグで選択された単語を自動検出
-- **辞書データ取得**: Free Dictionary APIを使用した辞書的な意味の取得
-- **類語データ取得**: Datamuse APIを使用した類語の取得
-- **結果表示UI**: サイドパネルで辞書・類語をタブ分け表示
-- **ショートカットキー**: Ctrl+Shift+Kでパネル開閉
+- **多言語対応**: 日本語と英語の両方に対応
+- **辞書検索**: 単語の詳細な意味と定義を表示
+- **類語検索**: 関連する類語と対義語を表示
+- **自動言語判定**: 入力された単語の言語を自動判定
+- **リアルタイム検索**: 単語選択時に即座に結果を表示
+- **レスポンシブデザイン**: モバイル・デスクトップ両対応
 
 ## 技術スタック
 
-- **フロントエンド**: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS
-- **データ取得**: React Query (@tanstack/react-query)
-- **API**: Next.js API Routes
-- **辞書API**: Free Dictionary API
-- **類語API**: Datamuse API
+- **フレームワーク**: Next.js 14 (App Router)
+- **言語**: TypeScript
+- **スタイリング**: Tailwind CSS
+- **状態管理**: React Query
+- **日本語辞書**: Japanese WordNet (83,168単語)
+- **英語辞書**: Datamuse API (Open English WordNet)
 - **デプロイ**: Vercel
 
 ## セットアップ
 
 ### 前提条件
 
-- Node.js 18以上
+- Node.js 18.0.0以上
 - npm または yarn
 
 ### インストール
 
 ```bash
-# 依存関係のインストール
+# リポジトリをクローン
+git clone <repository-url>
+cd wordtree
+
+# 依存関係をインストール
 npm install
 
-# 開発サーバーの起動
+# 開発サーバーを起動
 npm run dev
 ```
 
-### 環境変数
+### データセットの準備
 
-現在は外部APIを使用しているため、追加の環境変数は不要です。
+Japanese WordNetデータを自動的に処理するスクリプトが含まれています：
+
+```bash
+# データ処理スクリプトを実行
+node scripts/process-japanese-wordnet.js
+```
 
 ## 使用方法
 
 1. ブラウザで `http://localhost:3000` にアクセス
-2. テキスト入力領域に文章を入力またはペースト
-3. 任意の単語をクリックまたはドラッグで選択
-4. 自動的に辞書データと類語が取得され、右側のパネルに表示
-5. タブを切り替えて辞書・類語を確認
+2. テキストエリアに文章を入力またはペースト
+3. 調べたい単語を選択（ダブルクリックまたはドラッグ）
+4. 右側のパネルで辞書的な意味と類語を確認
+5. 検索履歴は自動的に保存され、過去の検索結果を参照可能
 
-## デプロイ
+### 検索機能
 
-### Vercelへのデプロイ
+- **日本語単語**: Japanese WordNetから詳細な意味と類語を取得
+- **英語単語**: Datamuse APIから英語の類語と関連語を取得
+- **自動言語判定**: 入力された単語の言語を自動で判定
+- **リアルタイム検索**: 単語選択時に即座に結果を表示
 
-1. [Vercel](https://vercel.com)にアカウントを作成
-2. GitHubリポジトリをVercelに接続
-3. 自動デプロイが実行されます
+## ライセンス
 
-### 手動デプロイ
+### Japanese WordNet
 
-```bash
-# Vercel CLIのインストール
-npm i -g vercel
+このプロジェクトは[Japanese WordNet](https://bond-lab.github.io/wnja/)のデータを使用しています。
 
-# デプロイ
-vercel
+**ライセンス表示要件:**
+日本語ワードネットのデータを直接・間接また全体・一部を問わずご利用になった上で、その成果を公開なさる場合は、以下のような文言で日本語ワードネットのサイトへリンクしてください：
+
+```
+日本語ワードネット（v1.1）© 2009-2011 NICT, 2012-2015 Francis Bond and 2016-2024 Francis Bond, Takayuki Kuribayashi
+```
+
+リンク先: https://bond-lab.github.io/wnja/index.ja.html
+
+### Datamuse API
+
+英語の辞書データは[Datamuse API](https://api.datamuse.com/)を使用しています。
+
+**ライセンス表示:**
+```
+English WordNet data provided by Datamuse API
+```
+
+リンク先: https://api.datamuse.com/
+
+## プロジェクト構造
+
+```
+wordtree/
+├── src/
+│   ├── app/
+│   │   ├── api/
+│   │   │   └── lookup/
+│   │   │       └── route.ts          # API エンドポイント
+│   │   ├── layout.tsx                # アプリケーションレイアウト
+│   │   ├── page.tsx                  # メインページ
+│   │   └── globals.css               # グローバルスタイル
+│   ├── components/
+│   │   ├── TextEditor.tsx            # テキストエディタ
+│   │   ├── WordLookupPanel.tsx      # 検索結果パネル
+│   │   └── QueryProvider.tsx         # React Query プロバイダー
+│   ├── hooks/
+│   │   └── useWordLookup.ts         # 検索フック
+│   └── data/
+│       └── japanese-wordnet.json    # 処理済みJapanese WordNetデータ
+├── scripts/
+│   └── process-japanese-wordnet.js  # データ処理スクリプト
+├── data/
+│   ├── wnjpn-ok.tab                 # Japanese WordNet生データ
+│   └── wnjpn-def.tab                # 定義データ
+├── public/                           # 静的ファイル
+├── package.json                      # 依存関係定義
+├── tsconfig.json                     # TypeScript設定
+├── next.config.ts                    # Next.js設定
+├── tailwind.config.js                # Tailwind CSS設定
+└── README.md
+```
+
+## API エンドポイント
+
+### GET /api/lookup
+
+単語の辞書情報と類語を取得します。
+
+**パラメータ:**
+- `word` (string, required): 検索する単語
+
+**レスポンス例:**
+```json
+{
+  "dictionary": {
+    "word": "美しい",
+    "meanings": [
+      {
+        "partOfSpeech": "形容詞",
+        "definitions": [
+          {
+            "definition": "感覚を活気づけ、知的情緒的賞賛を喚起する"
+          }
+        ]
+      }
+    ]
+  },
+  "synonyms": {
+    "word": "美しい",
+    "synonyms": ["きれい", "綺麗", "美麗", "華麗", "優美", "端麗"]
+  }
+}
 ```
 
 ## 開発
 
-### プロジェクト構造
+### 開発サーバーの起動
 
-```
-src/
-├── app/
-│   ├── api/lookup/route.ts  # APIエンドポイント
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── QueryProvider.tsx    # React Query Provider
-│   ├── TextEditor.tsx       # テキスト入力コンポーネント
-│   └── WordLookupPanel.tsx  # 結果表示パネル
-└── hooks/
-    └── useWordLookup.ts     # データ取得フック
+```bash
+npm run dev
 ```
 
-### 追加予定機能
+### ビルド
 
-- [ ] 語源データ取得
-- [ ] 翻訳機能
-- [ ] 可視化機能（D3.js）
-- [ ] モバイル対応の改善
-- [ ] 多言語UI対応
+```bash
+npm run build
+```
+
+### 型チェック
+
+```bash
+npm run type-check
+```
+
+### リント
+
+```bash
+npm run lint
+```
+
+## データセット
+
+### Japanese WordNet
+
+- **単語数**: 83,168単語
+- **エントリ数**: 144,308エントリ
+- **品詞別分布**:
+  - 名詞: 87,775
+  - 形容詞: 17,670
+  - 動詞: 31,715
+  - 副詞: 7,148
+
+### データ処理
+
+Japanese WordNetの生データを効率的なJSON形式に変換するスクリプトが含まれています：
+
+```bash
+# データをダウンロード
+curl -L https://github.com/bond-lab/wnja/releases/download/v1.1/wnjpn-ok.tab.gz -o data/wnjpn-ok.tab.gz
+curl -L https://github.com/bond-lab/wnja/releases/download/v1.1/wnjpn-def.tab.gz -o data/wnjpn-def.tab.gz
+
+# データを解凍
+gunzip data/wnjpn-ok.tab.gz
+gunzip data/wnjpn-def.tab.gz
+
+# データを処理
+node scripts/process-japanese-wordnet.js
+```
+
+## デプロイ
+
+このプロジェクトはVercelにデプロイされています。
+
+### 環境変数
+
+本番環境では以下の環境変数が設定されています：
+- `NEXT_PUBLIC_API_URL`: APIのベースURL
+
+## トラブルシューティング
+
+### よくある問題
+
+1. **npm run devでエラーが発生する場合**
+   - 正しいディレクトリ（wordtree/）にいることを確認
+   - `npm install`を再実行
+
+2. **データが表示されない場合**
+   - `node scripts/process-japanese-wordnet.js`を実行してデータを準備
+
+3. **APIエラーが発生する場合**
+   - ネットワーク接続を確認
+   - Datamuse APIの利用制限を確認
+
+## 貢献
+
+プルリクエストやイシューの報告を歓迎します。
+
+### 開発ガイドライン
+
+1. フォークしてブランチを作成
+2. 変更をコミット
+3. プルリクエストを作成
 
 ## ライセンス
 
-MIT License
+このプロジェクトのライセンスについては現在検討中です。ただし、Japanese WordNetデータの使用については、上記のライセンス要件を遵守してください。
+
+## 更新履歴
+
+- **v1.0.0**: 初期リリース
+  - 日本語・英語辞書検索機能
+  - リアルタイム検索
+  - レスポンシブデザイン
