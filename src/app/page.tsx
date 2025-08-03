@@ -1,9 +1,29 @@
 'use client';
 
+import { useState } from 'react';
 import { TextEditor } from '@/components/TextEditor';
+import { WordLookupPanel } from '@/components/WordLookupPanel';
+import { Footer } from '@/components/Footer';
 import { QueryProvider } from '@/components/QueryProvider';
+import { useWordLookup } from '@/hooks/useWordLookup';
 
 export default function Home() {
+  const [selectedWord, setSelectedWord] = useState<string>('');
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  // フックは常に同じ順序で呼び出す必要がある
+  const wordLookupResult = useWordLookup(selectedWord);
+
+  const handleWordSelection = (word: string) => {
+    setSelectedWord(word);
+    setIsPanelOpen(true);
+  };
+
+  const handleClosePanel = () => {
+    setIsPanelOpen(false);
+    setSelectedWord('');
+  };
+
   return (
     <QueryProvider>
       <div className="min-h-screen bg-gray-50">
@@ -16,34 +36,26 @@ export default function Home() {
           </header>
           
           <main className="max-w-4xl mx-auto">
-            <TextEditor />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <TextEditor onWordSelection={handleWordSelection} />
+              </div>
+              
+              {isPanelOpen && selectedWord && (
+                <div>
+                  <WordLookupPanel
+                    word={selectedWord}
+                    data={wordLookupResult.data}
+                    isLoading={wordLookupResult.isLoading}
+                    error={wordLookupResult.error}
+                    onClose={handleClosePanel}
+                  />
+                </div>
+              )}
+            </div>
           </main>
 
-          {/* ライセンス表示 */}
-          <footer className="mt-12 text-center">
-            <div className="text-xs text-gray-500 space-y-1">
-              <p>
-                <a 
-                  href="https://bond-lab.github.io/wnja/index.ja.html" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  日本語ワードネット（v1.1）© 2009-2011 NICT, 2012-2015 Francis Bond and 2016-2024 Francis Bond, Takayuki Kuribayashi
-                </a>
-              </p>
-              <p>
-                <a 
-                  href="https://api.datamuse.com/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 underline"
-                >
-                  English WordNet data provided by Datamuse API
-                </a>
-              </p>
-            </div>
-          </footer>
+          <Footer />
         </div>
       </div>
     </QueryProvider>
