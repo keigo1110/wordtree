@@ -33,6 +33,7 @@ interface WordLookupPanelProps {
   isLoading: boolean;
   error: Error | null;
   onClose: () => void;
+  onSynonymClick?: (synonym: string) => void;
 }
 
 type TabType = 'dictionary' | 'synonyms';
@@ -43,6 +44,7 @@ export function WordLookupPanel({
   isLoading,
   error,
   onClose,
+  onSynonymClick,
 }: WordLookupPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('dictionary');
 
@@ -199,12 +201,14 @@ export function WordLookupPanel({
                 <h4 className="font-medium text-gray-900 mb-2">類語</h4>
                 <div className="flex flex-wrap gap-2">
                   {data.synonyms.synonyms.map((synonym, index) => (
-                    <span
+                    <button
                       key={index}
-                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
+                      onClick={() => onSynonymClick?.(synonym)}
+                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 transition-colors cursor-pointer"
+                      title={`「${synonym}」を検索`}
                     >
                       {synonym}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>

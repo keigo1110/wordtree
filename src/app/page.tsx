@@ -44,6 +44,12 @@ export default function Home() {
     clearHistory();
   };
 
+  const handleSynonymClick = (synonym: string) => {
+    setSelectedWord(synonym);
+    setIsPanelOpen(true);
+    addToHistory(synonym);
+  };
+
   return (
     <QueryProvider>
       <div className="min-h-screen bg-gray-50">
@@ -97,6 +103,7 @@ export default function Home() {
                     isLoading={wordLookupResult.isLoading}
                     error={wordLookupResult.error}
                     onClose={handleClosePanel}
+                    onSynonymClick={handleSynonymClick}
                   />
                 )}
               </div>
