@@ -27,7 +27,7 @@ export default function Home() {
   return (
     <QueryProvider>
       <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
+        <div className="px-4 py-8">
           <header className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">WordTree</h1>
             <p className="text-gray-600">
@@ -35,7 +35,7 @@ export default function Home() {
             </p>
           </header>
           
-          <main className="max-w-4xl mx-auto">
+          <main className="w-full">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <TextEditor onWordSelection={handleWordSelection} />

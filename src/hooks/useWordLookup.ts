@@ -25,20 +25,34 @@ interface LookupData {
 }
 
 async function fetchWordLookup(word: string): Promise<LookupData> {
+  console.log('fetchWordLookup called with word:', word);
+  
   if (!word || word.trim().length === 0) {
+    console.log('Word is empty or invalid');
     throw new Error('Word is required');
   }
 
-  const response = await fetch(`/api/lookup?word=${encodeURIComponent(word.trim())}`);
+  const url = `/api/lookup?word=${encodeURIComponent(word.trim())}`;
+  console.log('Making API request to:', url);
+  
+  const response = await fetch(url);
+  
+  console.log('API response status:', response.status);
   
   if (!response.ok) {
+    console.error('API request failed:', response.status, response.statusText);
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log('API response data:', data);
+  return data;
 }
 
 export function useWordLookup(word: string) {
+  console.log('useWordLookup called with word:', word);
+  console.log('Query enabled:', !!word && word.trim().length > 0);
+  
   return useQuery({
     queryKey: ['wordLookup', word],
     queryFn: () => fetchWordLookup(word),

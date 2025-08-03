@@ -176,12 +176,14 @@ export function WordLookupPanel({
                 <div className="space-y-2">
                   {meaning.definitions.map((def, defIndex) => (
                     <div key={defIndex} className="pl-4">
-                      <p className="text-gray-900 mb-1">{def.definition}</p>
-                      {def.example && (
-                        <p className="text-sm text-gray-600 italic">
-                          「{def.example}」
-                        </p>
-                      )}
+                      <div className="border-b border-gray-100 pb-2 last:border-b-0">
+                        <p className="text-gray-900 mb-1">{def.definition}</p>
+                        {def.example && (
+                          <p className="text-sm text-gray-600 italic">
+                            「{def.example}」
+                          </p>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

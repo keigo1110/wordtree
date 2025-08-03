@@ -75,6 +75,8 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const word = searchParams.get('word');
 
+  console.log('API Request received for word:', word);
+
   if (!word) {
     return NextResponse.json(
       { error: 'Word parameter is required' },
@@ -83,29 +85,39 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    console.log('Starting lookup for word:', word);
+    console.log('Japanese WordNet DB size:', Object.keys(JAPANESE_WORDNET_DB).length);
+    
     const [dictionaryData, synonymsData] = await Promise.allSettled([
       fetchDictionaryData(word),
       fetchSynonymsData(word),
     ]);
 
+    console.log('Dictionary data result:', dictionaryData.status);
+    console.log('Synonyms data result:', synonymsData.status);
+
     const response: LookupResponse = {};
 
     if (dictionaryData.status === 'fulfilled') {
       response.dictionary = dictionaryData.value;
+      console.log('Dictionary data:', response.dictionary);
     }
 
     if (synonymsData.status === 'fulfilled') {
       response.synonyms = synonymsData.value;
+      console.log('Synonyms data:', response.synonyms);
     }
 
     // エラーハンドリング - どちらか一方でも成功すればOK
     if (dictionaryData.status === 'rejected' && synonymsData.status === 'rejected') {
+      console.error('Both dictionary and synonyms failed');
       return NextResponse.json(
         { error: 'Failed to fetch data for the word' },
         { status: 500 }
       );
     }
 
+    console.log('Final response:', response);
     return NextResponse.json(response);
   } catch (error) {
     console.error('Lookup API error:', error);
@@ -192,10 +204,15 @@ async function fetchEnglishDictionaryData(word: string): Promise<DictionaryRespo
 
 async function fetchJapaneseDictionaryData(word: string): Promise<DictionaryResponse> {
   try {
+    console.log('Fetching Japanese dictionary data for word:', word);
+    console.log('Available words in DB:', Object.keys(JAPANESE_WORDNET_DB).slice(0, 10));
+    
     // Japanese WordNetデータベースから検索
     const entries = JAPANESE_WORDNET_DB[word];
+    console.log('Direct match entries:', entries);
     
     if (entries && entries.length > 0) {
+      console.log('Found direct match for word:', word);
       // 品詞別に整理
       const meaningsMap = new Map<string, Array<{ definition: string; example?: string }>>();
       
@@ -214,15 +231,19 @@ async function fetchJapaneseDictionaryData(word: string): Promise<DictionaryResp
         definitions,
       }));
 
-      return {
+      const result = {
         word,
         meanings,
       };
+      console.log('Returning direct match result:', result);
+      return result;
     }
 
+    console.log('No direct match found, searching for partial matches...');
     // 部分一致で検索
     for (const [key, entries] of Object.entries(JAPANESE_WORDNET_DB)) {
       if (key.includes(word) || word.includes(key)) {
+        console.log('Found partial match with key:', key);
         const meaningsMap = new Map<string, Array<{ definition: string; example?: string }>>();
         
         entries.forEach(entry => {
@@ -240,13 +261,16 @@ async function fetchJapaneseDictionaryData(word: string): Promise<DictionaryResp
           definitions,
         }));
 
-        return {
+        const result = {
           word,
           meanings,
         };
+        console.log('Returning partial match result:', result);
+        return result;
       }
     }
 
+    console.log('No matches found for word:', word);
     // 結果が見つからない場合
     return {
       word,

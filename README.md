@@ -13,7 +13,7 @@
 
 ## 技術スタック
 
-- **フレームワーク**: Next.js 14 (App Router)
+- **フレームワーク**: Next.js 15.4.5 (App Router)
 - **言語**: TypeScript
 - **スタイリング**: Tailwind CSS
 - **状態管理**: React Query
