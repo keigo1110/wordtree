@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ClockIcon } from '@heroicons/react/24/outline';
 import { TextEditor } from '@/components/TextEditor';
 import { WordLookupPanel } from '@/components/WordLookupPanel';
 import { SearchHistory } from '@/components/SearchHistory';
+import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { QueryProvider } from '@/components/QueryProvider';
 import { useWordLookup } from '@/hooks/useWordLookup';
@@ -52,31 +52,15 @@ export default function Home() {
 
   return (
     <QueryProvider>
-      <div className="min-h-screen bg-gray-50">
-        <div className="px-4 py-4">
-          <header className="text-center mb-4">
-            <div className="flex items-center justify-between">
-              <div></div>
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-gray-900">WordTree</h1>
-              </div>
-              <button
-                onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-                className="flex items-center space-x-2 px-3 py-1.5 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
-                title="検索履歴を表示"
-              >
-                <ClockIcon className="h-4 w-4" />
-                <span className="text-sm font-medium">履歴</span>
-                {history.length > 0 && (
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-1.5 py-0.5 rounded-full">
-                    {history.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          </header>
-          
-          <main className="w-full">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Header
+          historyCount={history.length}
+          onHistoryToggle={() => setIsHistoryOpen(!isHistoryOpen)}
+          isHistoryOpen={isHistoryOpen}
+        />
+        
+        <main className="flex-1 px-4 py-8">
+          <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <TextEditor onWordSelection={handleWordSelection} />
@@ -105,10 +89,10 @@ export default function Home() {
                 )}
               </div>
             </div>
-          </main>
+          </div>
+        </main>
 
-          <Footer />
-        </div>
+        <Footer />
       </div>
     </QueryProvider>
   );

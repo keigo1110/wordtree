@@ -6,8 +6,8 @@ import { QueryProvider } from "@/components/QueryProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "WordTree - 多言語辞書・類語・語源検索",
-  description: "ブラウザ上で単語を選択して多言語訳・類語・語源を即座に取得できる軽量Webアプリ",
+  title: "WordTree - 単語展開ツール",
+  description: "ブラウザ上で単語を選択して辞書定義・シソーラス・翻訳・語源(予定)を即座に取得できるWebアプリ",
 };
 
 export default function RootLayout({

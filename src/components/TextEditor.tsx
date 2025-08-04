@@ -68,9 +68,12 @@ export const TextEditor = forwardRef<HTMLDivElement, TextEditorProps>(
 
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">テキスト入力</h2>
-          <p className="text-sm text-gray-600 mt-1">
+        <div className="p-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center space-x-2 mb-2">
+            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+            <h2 className="text-lg font-semibold text-gray-900">テキスト入力</h2>
+          </div>
+          <p className="text-sm text-gray-700">
             テキストを入力またはペーストして、単語を選択してください
           </p>
         </div>
@@ -89,8 +92,9 @@ export const TextEditor = forwardRef<HTMLDivElement, TextEditorProps>(
         />
         
         <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="text-sm text-gray-600">
-            <span>単語を選択して辞書検索</span>
+          <div className="flex items-center space-x-2">
+            <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+            <span className="text-sm text-gray-700 font-medium">単語を選択して辞書検索</span>
           </div>
         </div>
       </div>
