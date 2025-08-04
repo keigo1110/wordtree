@@ -16,7 +16,7 @@ export default function Home() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // フックは常に同じ順序で呼び出す必要がある
-  const wordLookupResult = useWordLookup(selectedWord);
+  const wordLookupResult = useWordLookup(selectedWord, true); // 語源機能を有効化
   const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory();
 
   const handleWordSelection = (word: string) => {

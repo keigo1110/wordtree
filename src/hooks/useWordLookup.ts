@@ -18,21 +18,43 @@ interface SynonymsData {
   antonyms?: string[];
 }
 
+interface TranslationsData {
+  word: string;
+  translations: Record<string, string[]>;
+}
+
+interface EtymologyData {
+  word: string;
+  etymology?: string;
+  source: 'dbnary';
+  retrievedAt: string;
+}
+
 interface LookupData {
   dictionary?: DictionaryData;
   synonyms?: SynonymsData;
+  translations?: TranslationsData;
+  etymology?: EtymologyData;
   error?: string;
 }
 
-async function fetchWordLookup(word: string): Promise<LookupData> {
-  console.log('fetchWordLookup called with word:', word);
+async function fetchWordLookup(word: string, includeEtymology: boolean = false): Promise<LookupData> {
+  console.log('fetchWordLookup called with word:', word, 'etymology:', includeEtymology);
   
   if (!word || word.trim().length === 0) {
     console.log('Word is empty or invalid');
     throw new Error('Word is required');
   }
 
-  const url = `/api/lookup?word=${encodeURIComponent(word.trim())}`;
+  const params = new URLSearchParams({
+    word: word.trim(),
+  });
+  
+  if (includeEtymology) {
+    params.append('etymology', 'true');
+  }
+
+  const url = `/api/lookup?${params.toString()}`;
   console.log('Making API request to:', url);
   
   const response = await fetch(url);
@@ -49,13 +71,13 @@ async function fetchWordLookup(word: string): Promise<LookupData> {
   return data;
 }
 
-export function useWordLookup(word: string) {
-  console.log('useWordLookup called with word:', word);
+export function useWordLookup(word: string, includeEtymology: boolean = false) {
+  console.log('useWordLookup called with word:', word, 'etymology:', includeEtymology);
   console.log('Query enabled:', !!word && word.trim().length > 0);
   
   return useQuery({
-    queryKey: ['wordLookup', word],
-    queryFn: () => fetchWordLookup(word),
+    queryKey: ['wordLookup', word, includeEtymology],
+    queryFn: () => fetchWordLookup(word, includeEtymology),
     enabled: !!word && word.trim().length > 0,
     staleTime: 1000 * 60 * 60 * 24, // 24時間
     retry: 2,

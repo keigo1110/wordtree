@@ -1,6 +1,7 @@
 'use client';
 
 import { XMarkIcon, MagnifyingGlassIcon, BookOpenIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
 
 interface DictionaryData {
   word: string;
@@ -22,13 +23,21 @@ interface SynonymsData {
 
 interface TranslationsData {
   word: string;
-  translations: Record<string, string[]>; // { "fra": ["banque"], "spa": ["banco"] }
+  translations: Record<string, string[]>;
+}
+
+interface EtymologyData {
+  word: string;
+  etymology?: string;
+  source: 'dbnary';
+  retrievedAt: string;
 }
 
 interface LookupData {
   dictionary?: DictionaryData;
   synonyms?: SynonymsData;
   translations?: TranslationsData;
+  etymology?: EtymologyData;
   error?: string;
 }
 
@@ -109,6 +118,221 @@ function getLanguageDisplayName(code: string): string {
   return languageNames[code] || code;
 }
 
+// 複合語の要素を抽出する関数
+function extractCompoundElements(etymology: string): Array<{ word: string; meaning: string }> {
+  const compoundMatch = etymology.match(/a compound of ([^.]+)/);
+  const compoundInfo = compoundMatch ? compoundMatch[1] : null;
+  
+  if (!compoundInfo) return [];
+  
+  // hēl ("health") + lā ("lo") の形式を解析
+  // 特殊文字（ēなど）も含めるように正規表現を修正
+  const elementMatches = compoundInfo.match(/([a-zA-Zēāōūī]+)\s*\("([^"]+)"\)/g);
+  
+  if (!elementMatches) return [];
+  
+  return elementMatches.map(element => {
+    const match = element.match(/([a-zA-Zēāōūī]+)\s*\("([^"]+)"\)/);
+    return match ? { word: match[1], meaning: match[2] } : null;
+  }).filter((element): element is { word: string; meaning: string } => element !== null);
+}
+
+// 語源を解析して系譜を抽出する関数
+function parseEtymology(etymology: string): Array<{ 
+  language: string; 
+  word: string; 
+  meaning?: string;
+  isCompound?: boolean;
+  compoundElements?: Array<{ word: string; meaning: string }>;
+}> {
+  const lineage: Array<{ 
+    language: string; 
+    word: string; 
+    meaning?: string;
+    isCompound?: boolean;
+    compoundElements?: Array<{ word: string; meaning: string }>;
+  }> = [];
+  
+  console.log('Parsing etymology:', etymology);
+  
+  // 複合語の要素を抽出
+  const compoundElements = extractCompoundElements(etymology);
+  console.log('Compound elements:', compoundElements);
+  
+  // より確実な解析方法
+  const parts = etymology.split(',').map(part => part.trim());
+  
+  parts.forEach((part, index) => {
+    console.log(`Processing part ${index}:`, part);
+    
+    // "From Middle English visual" パターン
+    if (part.startsWith('From ')) {
+      // From の後の部分を取得し、最後の単語を実際の単語として抽出
+      const afterFrom = part.substring(5); // "From " を除去
+      const words = afterFrom.split(' ');
+      if (words.length >= 2) {
+        const actualWord = words[words.length - 1].replace(/[""]/g, '').replace(/\.$/, '');
+        const language = words.slice(0, -1).join(' ');
+        console.log(`Found From: ${language} - ${actualWord}`);
+        
+        // 複合語の情報があるかチェック
+        if (compoundElements.length > 0) {
+          lineage.push({ 
+            language, 
+            word: actualWord, 
+            isCompound: true,
+            compoundElements
+          });
+        } else {
+          lineage.push({ language, word: actualWord });
+        }
+      }
+    }
+    // "from Old French visuel" パターン
+    else if (part.startsWith('from ')) {
+      // from の後の部分を取得し、最後の単語を実際の単語として抽出
+      const afterFrom = part.substring(5); // "from " を除去
+      const words = afterFrom.split(' ');
+      if (words.length >= 2) {
+        const actualWord = words[words.length - 1].replace(/[""]/g, '').replace(/\.$/, '');
+        const language = words.slice(0, -1).join(' ');
+        console.log(`Found from: ${language} - ${actualWord}`);
+        lineage.push({ language, word: actualWord });
+      }
+    }
+  });
+  
+  console.log('Final lineage:', lineage);
+  
+  // 重複を除去
+  const uniqueLineage = lineage.filter((item, index, self) => 
+    index === self.findIndex(t => t.language === item.language && t.word === item.word)
+  );
+  
+  // 古いものから新しいものへの正しい時系列順に並び替え
+  // 語源テキストの順序: From Middle English → from Old English → from Proto-Germanic
+  // 表示順序: Proto-Germanic → Old English → Middle English → Modern English
+  const sortedLineage = [...uniqueLineage].reverse();
+  
+  return sortedLineage;
+}
+
+// 語源系譜図コンポーネント
+function EtymologyTree({ etymology, currentWord }: { etymology: string; currentWord: string }) {
+  const lineage = parseEtymology(etymology);
+  
+  // デバッグ用
+  console.log('Etymology:', etymology);
+  console.log('Parsed lineage:', lineage);
+  
+  if (lineage.length === 0) {
+    return (
+      <div className="text-sm text-gray-700 leading-relaxed">
+        {etymology}
+      </div>
+    );
+  }
+
+  // 複合語の要素を抽出
+  const compoundElements = extractCompoundElements(etymology);
+
+  return (
+    <div className="space-y-4">
+      <div className="text-sm text-gray-700 leading-relaxed">
+        {etymology}
+      </div>
+      
+      <div className="border-l-4 border-orange-300 pl-4">
+        <h5 className="text-sm font-medium text-orange-700 mb-3">語源系譜</h5>
+        <div className="space-y-3">
+          {/* 複合語の要素がある場合は最初に表示 */}
+          {compoundElements.length > 0 && (
+            <div className="relative">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                      構成要素
+                    </span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {compoundElements.map((elem, idx) => 
+                        `${elem.word} ("${elem.meaning}")${idx < compoundElements.length - 1 ? ' + ' : ''}`
+                      ).join('')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              {/* 次の要素への矢印 */}
+              <div className="absolute left-1 top-6 w-0.5 h-3 bg-orange-300"></div>
+            </div>
+          )}
+          
+          {/* 古いものから新しいものへの流れ（上から下へ） */}
+          {lineage.map((item, index) => (
+            <div key={index} className="relative">
+              {/* 時系列の矢印 */}
+              {index < lineage.length - 1 && (
+                <div className="absolute left-1 top-6 w-0.5 h-3 bg-orange-300"></div>
+              )}
+              
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 mt-1">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full border-2 border-white shadow-sm"></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                      {item.language}
+                    </span>
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {item.word}
+                    </span>
+                    {item.isCompound && (
+                      <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        複合語
+                      </span>
+                    )}
+                  </div>
+                  {item.meaning && (
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {item.meaning}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {/* 現在の単語を最後に表示 */}
+          <div className="relative">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-1">
+                <div className="w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-sm"></div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                    Modern English
+                  </span>
+                  <span className="text-sm font-medium text-gray-900 truncate">
+                    {currentWord}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// タブの種類を定義
+type TabType = 'dictionary' | 'synonyms' | 'translations' | 'etymology';
+
 export function WordLookupPanel({
   word,
   data,
@@ -117,6 +341,8 @@ export function WordLookupPanel({
   onClose,
   onSynonymClick,
 }: WordLookupPanelProps) {
+  const [activeTab, setActiveTab] = useState<TabType>('dictionary');
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
@@ -165,7 +391,7 @@ export function WordLookupPanel({
     );
   }
 
-  if (!data || (!data.dictionary && !data.synonyms && !data.translations)) {
+  if (!data || (!data.dictionary && !data.synonyms && !data.translations && !data.etymology)) {
     return (
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
         <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
@@ -191,6 +417,18 @@ export function WordLookupPanel({
     );
   }
 
+  // 利用可能なタブを決定
+  const availableTabs: TabType[] = [];
+  if (data.dictionary) availableTabs.push('dictionary');
+  if (data.synonyms) availableTabs.push('synonyms');
+  if (data.translations) availableTabs.push('translations');
+  if (data.etymology) availableTabs.push('etymology');
+
+  // デフォルトタブを設定
+  if (availableTabs.length > 0 && !availableTabs.includes(activeTab)) {
+    setActiveTab(availableTabs[0]);
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
       {/* ヘッダー - 固定 */}
@@ -209,10 +447,32 @@ export function WordLookupPanel({
         </button>
       </div>
 
+      {/* タブナビゲーション */}
+      {availableTabs.length > 1 && (
+        <div className="flex border-b border-gray-200 bg-gray-50">
+          {availableTabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab
+                  ? 'text-blue-600 bg-white border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+            >
+              {tab === 'dictionary' && '辞書'}
+              {tab === 'synonyms' && '類語'}
+              {tab === 'translations' && '翻訳'}
+              {tab === 'etymology' && '語源'}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* コンテンツ - スクロール可能 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4">
         {/* 辞書セクション */}
-        {data.dictionary && (
+        {activeTab === 'dictionary' && data.dictionary && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -245,7 +505,7 @@ export function WordLookupPanel({
         )}
 
         {/* 類語セクション */}
-        {data.synonyms && (
+        {activeTab === 'synonyms' && data.synonyms && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -297,7 +557,7 @@ export function WordLookupPanel({
         )}
 
         {/* 翻訳セクション */}
-        {data.translations && (
+        {activeTab === 'translations' && data.translations && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
@@ -341,6 +601,28 @@ export function WordLookupPanel({
             ) : (
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-gray-500 text-center text-sm">翻訳が見つかりませんでした。</p>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* 語源セクション */}
+        {activeTab === 'etymology' && data.etymology && (
+          <section className="space-y-2">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <h4 className="text-base font-semibold text-gray-900">語源</h4>
+            </div>
+            {data.etymology.etymology ? (
+              <div className="bg-orange-50 rounded-lg p-3">
+                <EtymologyTree etymology={data.etymology.etymology} currentWord={word} />
+                <div className="text-xs text-gray-500 border-t border-orange-200 pt-2 mt-4">
+                  <span>出典: DBnary / Wiktionary (CC-BY-SA 3.0)</span>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500 text-center text-sm">語源情報が見つかりませんでした。</p>
               </div>
             )}
           </section>
