@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { XMarkIcon, MagnifyingGlassIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 
 interface DictionaryData {
@@ -316,7 +315,7 @@ export function WordLookupPanel({
                       return langA.localeCompare(langB);
                     })
                     .map(([lang, lemmas], index) => (
-                    <div key={lang} className={`p-2 ${index % 2 === 0 ? 'border-r border-purple-200' : ''} ${index < 2 ? 'border-b border-purple-200' : index >= Object.entries(data.translations.translations).length - 2 ? '' : 'border-b border-purple-200'}`}>
+                    <div key={lang} className={`p-2 ${index % 2 === 0 ? 'border-r border-purple-200' : ''} ${index < 2 ? 'border-b border-purple-200' : index >= Object.entries(data.translations!.translations).length - 2 ? '' : 'border-b border-purple-200'}`}>
                       <div className="flex items-center justify-between mb-1.5">
                         <h5 className="text-xs font-medium text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded-full">
                           {getLanguageDisplayName(lang)}

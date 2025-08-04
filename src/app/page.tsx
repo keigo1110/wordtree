@@ -74,7 +74,6 @@ export default function Home() {
                   onRemoveWord={handleHistoryRemove}
                   onClearHistory={handleHistoryClear}
                   isOpen={isHistoryOpen}
-                  onClose={() => setIsHistoryOpen(false)}
                 />
                 
                 {isPanelOpen && selectedWord && (

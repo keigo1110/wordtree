@@ -13,7 +13,6 @@ interface SearchHistoryProps {
   onRemoveWord: (word: string) => void;
   onClearHistory: () => void;
   isOpen: boolean;
-  onClose: () => void;
 }
 
 export function SearchHistory({
@@ -22,7 +21,6 @@ export function SearchHistory({
   onRemoveWord,
   onClearHistory,
   isOpen,
-  onClose,
 }: SearchHistoryProps) {
   if (!isOpen || history.length === 0) return null;
 
@@ -44,7 +42,7 @@ export function SearchHistory({
       <div className="relative">
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex items-center space-x-2 min-w-max">
-                      {history.map((item, index) => (
+                      {history.map((item) => (
             <div key={`${item.word}-${item.timestamp}`} className="flex items-center flex-shrink-0 group">
               <button
                 onClick={() => onSelectWord(item.word)}

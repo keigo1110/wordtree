@@ -59,7 +59,7 @@ export const TextEditor = React.forwardRef<HTMLTextAreaElement, TextEditorProps>
           </p>
         </div>
         <textarea
-          ref={textareaRef}
+          ref={ref || textareaRef}
           className="h-[calc(100vh-16rem)] min-h-[300px] w-full p-6 focus:outline-none focus:ring-0 text-gray-900 leading-relaxed resize-y"
           placeholder="ここにテキストを入力またはペーストしてください..."
           value={value}

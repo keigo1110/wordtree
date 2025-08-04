@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { gunzipSync } from 'fflate';
+// import { gunzipSync } from 'fflate'; // 現在は使用していないためコメントアウト
 
 // サポート言語の定義
 const SUPPORTED_LANGUAGES = [

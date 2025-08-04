@@ -1,6 +1,6 @@
 'use client';
 
-import { HeartIcon } from '@heroicons/react/24/outline';
+
 
 export function Footer() {
   return (
