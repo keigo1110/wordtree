@@ -47,7 +47,7 @@ export function Footer() {
 
           {/* Copyright */}
           <p className="text-sm text-gray-500">
-            © {new Date().getFullYear()} WordTree
+            © {new Date().getFullYear()} LexiAtlas
           </p>
         </div>
       </div>
