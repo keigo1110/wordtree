@@ -56,6 +56,25 @@ node scripts/process-japanese-wordnet.js
 npm run data:update
 ```
 
+### 完全なセットアップ手順
+
+```bash
+# 1. リポジトリをクローン
+git clone <repository-url>
+cd wordtree
+
+# 2. 依存関係をインストール
+npm install
+
+# 3. データセットの準備
+npm run data:update
+
+# 4. 開発サーバーを起動
+npm run dev
+```
+
+**注意**: `npm run data:update`は初回のみ必要です。これにより約32MBの翻訳データが生成されます。
+
 ## 使用方法
 
 1. ブラウザで `http://localhost:3000` にアクセス
@@ -136,6 +155,7 @@ wordtree/
 ├── data/
 │   ├── wnjpn-ok.tab                 # Japanese WordNet生データ
 │   └── wnjpn-def.tab                # 定義データ
+│   └── (omw-1.4/ は開発時のみ、本番では不要)
 ├── public/                           # 静的ファイル
 ├── package.json                      # 依存関係定義
 ├── tsconfig.json                     # TypeScript設定
@@ -216,6 +236,29 @@ npm run type-check
 npm run lint
 ```
 
+### データ更新
+
+OMWデータの更新が必要な場合（年1回程度）：
+
+```bash
+# データの再ダウンロードと処理
+npm run data:update
+
+# または個別に実行
+npm run data:download  # データダウンロードのみ
+npm run data:process   # データ処理のみ
+```
+
+### データ処理スクリプト
+
+```bash
+# Japanese WordNetデータ処理
+node scripts/process-japanese-wordnet.js
+
+# OMWデータ処理
+node scripts/process-omw.js
+```
+
 ## データセット
 
 ### Japanese WordNet
@@ -228,7 +271,16 @@ npm run lint
   - 動詞: 31,715
   - 副詞: 7,148
 
+### Open Multilingual Wordnet (OMW)
+
+- **対応言語**: 19言語
+- **総synset数**: 123,015
+- **総lemma数**: 約100万語
+- **ファイルサイズ**: 約32MB（処理済みJSON）
+
 ### データ処理
+
+#### Japanese WordNet
 
 Japanese WordNetの生データを効率的なJSON形式に変換するスクリプトが含まれています：
 
@@ -245,6 +297,20 @@ gunzip data/wnjpn-def.tab.gz
 node scripts/process-japanese-wordnet.js
 ```
 
+#### OMWデータ
+
+Open Multilingual Wordnetデータの処理：
+
+```bash
+# 自動処理（推奨）
+npm run data:update
+
+# 手動処理
+curl -L "https://github.com/omwn/omw-data/releases/download/v1.4/omw-1.4.tar.xz" -o data/omw-1.4.tar.xz
+tar -xf data/omw-1.4.tar.xz -C data/
+node scripts/process-omw.js
+```
+
 ## デプロイ
 
 このプロジェクトはVercelにデプロイされています。
@@ -253,6 +319,12 @@ node scripts/process-japanese-wordnet.js
 
 本番環境では以下の環境変数が設定されています：
 - `NEXT_PUBLIC_API_URL`: APIのベースURL
+
+### デプロイ時の注意点
+
+- **ファイルサイズ**: 処理済みJSONファイル（約32MB）はVercel Edge Functions制限内
+- **データ更新**: 本番環境では生データは不要、処理済みJSONのみ使用
+- **自動デプロイ**: GitHubプッシュにより自動的にデプロイ
 
 ## トラブルシューティング
 
@@ -264,10 +336,20 @@ node scripts/process-japanese-wordnet.js
 
 2. **データが表示されない場合**
    - `node scripts/process-japanese-wordnet.js`を実行してデータを準備
+   - `npm run data:update`を実行して翻訳データを準備
 
-3. **APIエラーが発生する場合**
+3. **翻訳機能が動作しない場合**
+   - `src/data/multilingual-wordnet.json`が存在することを確認
+   - `npm run data:process`を実行してデータを再生成
+
+4. **APIエラーが発生する場合**
    - ネットワーク接続を確認
    - Datamuse APIの利用制限を確認
+   - 翻訳機能はネットワークエラー時もフォールバック処理で動作
+
+5. **ファイルサイズが大きすぎる場合**
+   - 生データ（data/omw-1.4/）は削除可能
+   - 処理済みJSONファイルのみが本番環境で使用される
 
 ## 貢献
 
@@ -286,9 +368,11 @@ node scripts/process-japanese-wordnet.js
 ## 更新履歴
 
 - **v1.1.0**: 翻訳機能追加
-  - 30言語以上の多言語翻訳機能
-  - OMWデータ統合
+  - 19言語の多言語翻訳機能
+  - OMWデータ統合（123,015 synsets）
   - 翻訳タブUI追加
+  - エラーハンドリング強化
+  - 部分一致検索機能
 - **v1.0.0**: 初期リリース
   - 日本語・英語辞書検索機能
   - リアルタイム検索
