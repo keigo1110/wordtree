@@ -1,7 +1,6 @@
 'use client';
 
 import { XMarkIcon, MagnifyingGlassIcon, BookOpenIcon } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 
 interface DictionaryData {
   word: string;
@@ -153,7 +152,7 @@ function parseEtymology(etymology: string): Array<{ language: string; word: stri
   const parts = etymology.split(',').map(p => p.trim());
   const lineage: Array<{ language: string; word: string }> = [];
   for (const part of parts) {
-    let text = part.replace(/^from |^From /, '').trim();
+    const text = part.replace(/^from |^From /, '').trim();
     let found = false;
     for (const lang of LANGUAGE_NAMES) {
       if (text.startsWith(lang)) {
@@ -188,9 +187,6 @@ function EtymologyTree({ etymology, currentWord }: { etymology: string; currentW
     );
   }
 
-  // 複合語の要素を抽出
-  const compoundElements = extractCompoundElements(etymology);
-  
   // 特別処理の情報を抽出
   const specialElements = extractSpecialEtymologyInfo(etymology);
 
@@ -281,9 +277,6 @@ function EtymologyTree({ etymology, currentWord }: { etymology: string; currentW
   );
 }
 
-// タブの種類を定義
-type TabType = 'dictionary' | 'synonyms' | 'translations' | 'etymology';
-
 export function WordLookupPanel({
   word,
   data,
@@ -292,7 +285,6 @@ export function WordLookupPanel({
   onClose,
   onSynonymClick,
 }: WordLookupPanelProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('dictionary');
 
   if (isLoading) {
     return (
@@ -368,18 +360,6 @@ export function WordLookupPanel({
     );
   }
 
-  // 利用可能なタブを決定
-  const availableTabs: TabType[] = [];
-  if (data.dictionary) availableTabs.push('dictionary');
-  if (data.synonyms) availableTabs.push('synonyms');
-  if (data.translations) availableTabs.push('translations');
-  if (data.etymology) availableTabs.push('etymology');
-
-  // デフォルトタブを設定
-  if (availableTabs.length > 0 && !availableTabs.includes(activeTab)) {
-    setActiveTab(availableTabs[0]);
-  }
-
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
       {/* ヘッダー - 固定 */}
@@ -398,32 +378,10 @@ export function WordLookupPanel({
         </button>
       </div>
 
-      {/* タブナビゲーション */}
-      {availableTabs.length > 1 && (
-        <div className="flex border-b border-gray-200 bg-gray-50">
-          {availableTabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
-                activeTab === tab
-                  ? 'text-blue-600 bg-white border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              }`}
-            >
-              {tab === 'dictionary' && '辞書'}
-              {tab === 'synonyms' && '類語'}
-              {tab === 'translations' && '翻訳'}
-              {tab === 'etymology' && '語源'}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* コンテンツ - スクロール可能 */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* 辞書セクション */}
-        {activeTab === 'dictionary' && data.dictionary && (
+        {data.dictionary && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -456,7 +414,7 @@ export function WordLookupPanel({
         )}
 
         {/* 類語セクション */}
-        {activeTab === 'synonyms' && data.synonyms && (
+        {data.synonyms && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -508,7 +466,7 @@ export function WordLookupPanel({
         )}
 
         {/* 翻訳セクション */}
-        {activeTab === 'translations' && data.translations && (
+        {data.translations && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
@@ -558,7 +516,7 @@ export function WordLookupPanel({
         )}
 
         {/* 語源セクション */}
-        {activeTab === 'etymology' && data.etymology && (
+        {data.etymology && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
