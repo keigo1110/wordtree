@@ -41,13 +41,14 @@ export function SearchHistory({
           クリア
         </button>
       </div>
-      <div className="overflow-x-auto">
-        <div className="flex items-center space-x-2 min-w-max">
-          {history.map((item, index) => (
-            <div key={`${item.word}-${item.timestamp}`} className="flex items-center flex-shrink-0">
+      <div className="relative">
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex items-center space-x-2 min-w-max">
+                      {history.map((item, index) => (
+            <div key={`${item.word}-${item.timestamp}`} className="flex items-center flex-shrink-0 group">
               <button
                 onClick={() => onSelectWord(item.word)}
-                className="flex items-center space-x-1 px-2 py-1 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                className="flex items-center space-x-1 px-2 py-1 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors group-hover:text-red-600"
                 title={item.word}
               >
                 <span className="font-medium">{item.word}</span>
@@ -61,7 +62,10 @@ export function SearchHistory({
               </button>
             </div>
           ))}
+          </div>
         </div>
+        {/* 右側のグラデーションオーバーレイ */}
+        <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-gray-50 to-transparent pointer-events-none"></div>
       </div>
     </div>
   );

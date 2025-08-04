@@ -89,9 +89,8 @@ export const TextEditor = forwardRef<HTMLDivElement, TextEditorProps>(
         />
         
         <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between text-sm text-gray-600">
+          <div className="text-sm text-gray-600">
             <span>単語を選択して辞書検索</span>
-            <span className="text-xs">ショートカット: Ctrl+Shift+K</span>
           </div>
         </div>
       </div>

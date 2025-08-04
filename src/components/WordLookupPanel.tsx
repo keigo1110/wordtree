@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { XMarkIcon, BookOpenIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, MagnifyingGlassIcon, BookOpenIcon } from '@heroicons/react/24/outline';
 
 interface DictionaryData {
   word: string;
@@ -41,8 +41,6 @@ interface WordLookupPanelProps {
   onClose: () => void;
   onSynonymClick?: (synonym: string) => void;
 }
-
-type TabType = 'dictionary' | 'synonyms' | 'translations';
 
 // 言語コードを表示名に変換する関数
 function getLanguageDisplayName(code: string): string {
@@ -120,8 +118,6 @@ export function WordLookupPanel({
   onClose,
   onSynonymClick,
 }: WordLookupPanelProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('dictionary');
-
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
@@ -195,102 +191,71 @@ export function WordLookupPanel({
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">{word}</h3>
+          <h3 className="text-base font-semibold text-blue-900 bg-blue-100 px-2 py-0.5 rounded">{word}</h3>
           {data.dictionary?.phonetic && (
-            <p className="text-sm text-gray-500 mt-1">[{data.dictionary.phonetic}]</p>
+            <p className="text-xs text-blue-600 mt-0.5">[{data.dictionary.phonetic}]</p>
           )}
         </div>
         <button
           onClick={onClose}
           className="text-gray-400 hover:text-gray-600 transition-colors"
         >
-          <XMarkIcon className="h-5 w-5" />
+          <XMarkIcon className="h-4 w-4" />
         </button>
       </div>
 
-      {/* タブ */}
-      <div className="flex border-b border-gray-200">
+      {/* コンテンツ - 一覧表示 */}
+      <div className="p-4 space-y-4">
+        {/* 辞書セクション */}
         {data.dictionary && (
-          <button
-            onClick={() => setActiveTab('dictionary')}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'dictionary'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            辞書
-          </button>
-        )}
-        {data.synonyms && (
-          <button
-            onClick={() => setActiveTab('synonyms')}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'synonyms'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            類語
-          </button>
-        )}
-        {data.translations && (
-          <button
-            onClick={() => setActiveTab('translations')}
-            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
-              activeTab === 'translations'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            翻訳
-          </button>
-        )}
-      </div>
-
-      {/* コンテンツ */}
-      <div className="p-4 max-h-96 overflow-y-auto">
-        {activeTab === 'dictionary' && data.dictionary && (
-          <div className="space-y-4">
-            {data.dictionary.meanings.map((meaning, index) => (
-              <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
-                <div className="flex items-center mb-2">
-                  <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                    {meaning.partOfSpeech}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {meaning.definitions.map((def, defIndex) => (
-                    <div key={defIndex} className="pl-4">
-                      <div className="border-b border-gray-100 pb-2 last:border-b-0">
-                        <p className="text-gray-900 mb-1">{def.definition}</p>
+          <section className="space-y-2">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <h4 className="text-base font-semibold text-gray-900">辞書</h4>
+            </div>
+            <div className="space-y-2">
+              {data.dictionary.meanings.map((meaning, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-3">
+                  <div className="flex items-center mb-2">
+                    <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                      {meaning.partOfSpeech}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {meaning.definitions.map((def, defIndex) => (
+                      <div key={defIndex} className="border-l-4 border-blue-200 pl-3">
+                        <p className="text-gray-900 text-sm leading-tight">{def.definition}</p>
                         {def.example && (
-                          <p className="text-sm text-gray-600 italic">
+                          <p className="text-xs text-gray-600 italic mt-0.5">
                             「{def.example}」
                           </p>
                         )}
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </section>
         )}
 
-        {activeTab === 'synonyms' && data.synonyms && (
-          <div className="space-y-4">
+        {/* 類語セクション */}
+        {data.synonyms && (
+          <section className="space-y-2">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <h4 className="text-base font-semibold text-gray-900">類語</h4>
+            </div>
             {data.synonyms.synonyms.length > 0 ? (
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">類語</h4>
-                <div className="flex flex-wrap gap-2">
+              <div className="bg-green-50 rounded-lg p-3">
+                <div className="flex flex-wrap gap-1.5">
                   {data.synonyms.synonyms.map((synonym, index) => (
                     <button
                       key={index}
                       onClick={() => onSynonymClick?.(synonym)}
-                      className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm hover:bg-blue-100 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 bg-white text-green-700 rounded-full text-xs hover:bg-green-100 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
                       title={`「${synonym}」を検索`}
                     >
                       {synonym}
@@ -299,44 +264,67 @@ export function WordLookupPanel({
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">類語が見つかりませんでした。</p>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500 text-center text-sm">類語が見つかりませんでした。</p>
+              </div>
             )}
 
+            {/* 対義語（英語のみ） */}
             {data.synonyms.antonyms && data.synonyms.antonyms.length > 0 && (
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">対義語</h4>
-                <div className="flex flex-wrap gap-2">
-                  {data.synonyms.antonyms.map((antonym, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm"
-                    >
-                      {antonym}
-                    </span>
-                  ))}
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <h5 className="text-sm font-medium text-gray-900">対義語</h5>
+                </div>
+                <div className="bg-red-50 rounded-lg p-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {data.synonyms.antonyms.map((antonym, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1.5 bg-white text-red-700 rounded-full text-sm shadow-sm"
+                      >
+                        {antonym}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
-          </div>
+          </section>
         )}
 
-        {activeTab === 'translations' && data.translations && (
-          <div className="space-y-4">
+        {/* 翻訳セクション */}
+        {data.translations && (
+          <section className="space-y-2">
+            <div className="flex items-center space-x-2 mb-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <h4 className="text-base font-semibold text-gray-900">翻訳</h4>
+            </div>
             {Object.keys(data.translations.translations).length > 0 ? (
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">翻訳</h4>
-                <div className="space-y-3">
-                  {Object.entries(data.translations.translations).map(([lang, lemmas]) => (
-                    <div key={lang} className="border-b border-gray-100 pb-3 last:border-b-0">
-                      <h5 className="text-xs font-medium text-gray-500 mb-2 uppercase">
-                        {getLanguageDisplayName(lang)}
-                      </h5>
-                      <div className="flex flex-wrap gap-2">
+              <div className="bg-purple-50 rounded-lg p-3">
+                <div className="grid grid-cols-2 gap-0">
+                  {Object.entries(data.translations.translations)
+                    .sort(([langA], [langB]) => {
+                      // 英語を一番上位に配置
+                      if (langA === 'en' || langA === 'eng') return -1;
+                      if (langB === 'en' || langB === 'eng') return 1;
+                      // その他の言語はアルファベット順
+                      return langA.localeCompare(langB);
+                    })
+                    .map(([lang, lemmas], index) => (
+                    <div key={lang} className={`p-2 ${index % 2 === 0 ? 'border-r border-purple-200' : ''} ${index < 2 ? 'border-b border-purple-200' : index >= Object.entries(data.translations.translations).length - 2 ? '' : 'border-b border-purple-200'}`}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <h5 className="text-xs font-medium text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded-full">
+                          {getLanguageDisplayName(lang)}
+                        </h5>
+                        <span className="text-xs text-purple-600">{lemmas.length}語</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
                         {lemmas.map((lemma, index) => (
                           <button
                             key={index}
                             onClick={() => onSynonymClick?.(lemma)}
-                            className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm hover:bg-green-100 transition-colors cursor-pointer"
+                            className="px-2 py-0.5 bg-white text-purple-700 rounded-full text-xs hover:bg-purple-100 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
                             title={`「${lemma}」を検索`}
                           >
                             {lemma}
@@ -348,13 +336,13 @@ export function WordLookupPanel({
                 </div>
               </div>
             ) : (
-              <p className="text-gray-500 text-center py-4">翻訳が見つかりませんでした。</p>
+              <div className="bg-gray-50 rounded-lg p-3">
+                <p className="text-gray-500 text-center text-sm">翻訳が見つかりませんでした。</p>
+              </div>
             )}
-          </div>
+          </section>
         )}
       </div>
-
-
     </div>
   );
 } 

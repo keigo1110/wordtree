@@ -53,25 +53,22 @@ export default function Home() {
   return (
     <QueryProvider>
       <div className="min-h-screen bg-gray-50">
-        <div className="px-4 py-8">
-          <header className="text-center mb-8">
-            <div className="flex items-center justify-between mb-4">
+        <div className="px-4 py-4">
+          <header className="text-center mb-4">
+            <div className="flex items-center justify-between">
               <div></div>
               <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">WordTree</h1>
-                <p className="text-gray-600">
-                  単語を選択して辞書定義・類語・翻訳を調べる
-                </p>
+                <h1 className="text-3xl font-bold text-gray-900">WordTree</h1>
               </div>
               <button
                 onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-                className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
+                className="flex items-center space-x-2 px-3 py-1.5 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
                 title="検索履歴を表示"
               >
-                <ClockIcon className="h-5 w-5" />
+                <ClockIcon className="h-4 w-4" />
                 <span className="text-sm font-medium">履歴</span>
                 {history.length > 0 && (
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
+                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-1.5 py-0.5 rounded-full">
                     {history.length}
                   </span>
                 )}
