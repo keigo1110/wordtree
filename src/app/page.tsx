@@ -60,7 +60,7 @@ export default function Home() {
               <div className="text-center">
                 <h1 className="text-4xl font-bold text-gray-900 mb-2">WordTree</h1>
                 <p className="text-gray-600">
-                  単語を選択して辞書・類語を調べる
+                  単語を選択して辞書定義・類語・翻訳を調べる
                 </p>
               </div>
               <button

@@ -24,6 +24,16 @@ export function Footer() {
             English WordNet data provided by Datamuse API
           </a>
         </p>
+        <p>
+          <a 
+            href="https://github.com/omwn/omw-data" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            Open Multilingual Wordnet data provided by OMW project
+          </a>
+        </p>
       </div>
     </footer>
   );

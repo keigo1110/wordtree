@@ -540,7 +540,7 @@ async function fetchJapaneseWordNetData(word: string): Promise<SynonymResponse> 
     return {
       word,
       synonyms: synonyms.slice(0, 15), // 最大15個の類語
-      antonyms: undefined,
+      antonyms: undefined, // 日本語では対義語を提供しない
     };
   } catch (error) {
     console.warn('Japanese WordNet lookup failed:', error);
