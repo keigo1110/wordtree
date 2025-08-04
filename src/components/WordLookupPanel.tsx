@@ -21,9 +21,15 @@ interface SynonymsData {
   antonyms?: string[];
 }
 
+interface TranslationsData {
+  word: string;
+  translations: Record<string, string[]>; // { "fra": ["banque"], "spa": ["banco"] }
+}
+
 interface LookupData {
   dictionary?: DictionaryData;
   synonyms?: SynonymsData;
+  translations?: TranslationsData;
   error?: string;
 }
 
@@ -36,7 +42,44 @@ interface WordLookupPanelProps {
   onSynonymClick?: (synonym: string) => void;
 }
 
-type TabType = 'dictionary' | 'synonyms';
+type TabType = 'dictionary' | 'synonyms' | 'translations';
+
+// 言語コードを表示名に変換する関数
+function getLanguageDisplayName(code: string): string {
+  const languageNames: Record<string, string> = {
+    'eng': 'English',
+    'jpn': '日本語',
+    'fra': 'Français',
+    'spa': 'Español',
+    'deu': 'Deutsch',
+    'ita': 'Italiano',
+    'por': 'Português',
+    'rus': 'Русский',
+    'cmn': '中文',
+    'kor': '한국어',
+    'nld': 'Nederlands',
+    'swe': 'Svenska',
+    'dan': 'Dansk',
+    'nor': 'Norsk',
+    'fin': 'Suomi',
+    'pol': 'Polski',
+    'ces': 'Čeština',
+    'slk': 'Slovenčina',
+    'hun': 'Magyar',
+    'ron': 'Română',
+    'bul': 'Български',
+    'hrv': 'Hrvatski',
+    'srp': 'Српски',
+    'slv': 'Slovenščina',
+    'est': 'Eesti',
+    'lav': 'Latviešu',
+    'lit': 'Lietuvių',
+    'ell': 'Ελληνικά',
+    'tur': 'Türkçe',
+    'ara': 'العربية'
+  };
+  return languageNames[code] || code;
+}
 
 export function WordLookupPanel({
   word,
@@ -94,7 +137,7 @@ export function WordLookupPanel({
     );
   }
 
-  if (!data || (!data.dictionary && !data.synonyms)) {
+  if (!data || (!data.dictionary && !data.synonyms && !data.translations)) {
     return (
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
@@ -160,6 +203,18 @@ export function WordLookupPanel({
             }`}
           >
             類語
+          </button>
+        )}
+        {data.translations && (
+          <button
+            onClick={() => setActiveTab('translations')}
+            className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+              activeTab === 'translations'
+                ? 'text-blue-600 border-b-2 border-blue-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            翻訳
           </button>
         )}
       </div>
@@ -230,6 +285,39 @@ export function WordLookupPanel({
                   ))}
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'translations' && data.translations && (
+          <div className="space-y-4">
+            {Object.keys(data.translations.translations).length > 0 ? (
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">翻訳</h4>
+                <div className="space-y-3">
+                  {Object.entries(data.translations.translations).map(([lang, lemmas]) => (
+                    <div key={lang} className="border-b border-gray-100 pb-3 last:border-b-0">
+                      <h5 className="text-xs font-medium text-gray-500 mb-2 uppercase">
+                        {getLanguageDisplayName(lang)}
+                      </h5>
+                      <div className="flex flex-wrap gap-2">
+                        {lemmas.map((lemma, index) => (
+                          <button
+                            key={index}
+                            onClick={() => onSynonymClick?.(lemma)}
+                            className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm hover:bg-green-100 transition-colors cursor-pointer"
+                            title={`「${lemma}」を検索`}
+                          >
+                            {lemma}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-4">翻訳が見つかりませんでした。</p>
             )}
           </div>
         )}

@@ -6,17 +6,22 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "data:download": "curl -L \"https://github.com/omwn/omw-data/releases/download/v1.4/omw-1.4.tar.xz\" -o data/omw-1.4.tar.xz && tar -xf data/omw-1.4.tar.xz -C data/",
+    "data:process": "node scripts/process-omw.js",
+    "data:update": "npm run data:download && npm run data:process"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@tanstack/react-query": "^5.84.1",
     "@tanstack/react-query-devtools": "^5.84.1",
     "@types/d3": "^7.4.3",
+    "@types/xmldom": "^0.1.34",
     "d3": "^7.9.0",
     "next": "15.4.5",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "xmldom": "^0.6.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

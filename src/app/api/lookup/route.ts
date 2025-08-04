@@ -20,9 +20,15 @@ interface SynonymResponse {
   antonyms?: string[];
 }
 
+interface TranslationResponse {
+  word: string;
+  translations: Record<string, string[]>; // { "fra": ["banque"], "spa": ["banco"] }
+}
+
 interface LookupResponse {
   dictionary?: DictionaryResponse;
   synonyms?: SynonymResponse;
+  translations?: TranslationResponse;     // ★ 追加
   error?: string;
 }
 
@@ -43,6 +49,9 @@ interface JapaneseWordNetEntry {
 
 // Japanese WordNet データを読み込み
 let JAPANESE_WORDNET_DB: Record<string, JapaneseWordNetEntry[]> = {};
+
+// OMW データを読み込み
+let OMW_DATA: Record<string, Record<string, string[]>> = {};
 
 // データファイルを読み込む
 try {
@@ -71,6 +80,22 @@ try {
   };
 }
 
+// OMW データを読み込み
+try {
+  const omwDataPath = path.join(process.cwd(), 'src', 'data', 'multilingual-wordnet.json');
+  if (fs.existsSync(omwDataPath)) {
+    const omwData = JSON.parse(fs.readFileSync(omwDataPath, 'utf8'));
+    OMW_DATA = omwData;
+    console.log(`OMWデータを読み込みました: ${Object.keys(OMW_DATA).length} synsets`);
+  } else {
+    console.warn('OMWデータファイルが見つかりません:', omwDataPath);
+    console.log('npm run data:update を実行してデータを生成してください');
+  }
+} catch (error) {
+  console.warn('OMWデータの読み込みに失敗しました:', error);
+  OMW_DATA = {};
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const word = searchParams.get('word');
@@ -88,13 +113,18 @@ export async function GET(request: NextRequest) {
     console.log('Starting lookup for word:', word);
     console.log('Japanese WordNet DB size:', Object.keys(JAPANESE_WORDNET_DB).length);
     
-    const [dictionaryData, synonymsData] = await Promise.allSettled([
+    // synsetIdsを取得（翻訳機能用）
+    const synsetIds = await getSynsetIds(word);
+
+    const [dictionaryData, synonymsData, translationsData] = await Promise.allSettled([
       fetchDictionaryData(word),
       fetchSynonymsData(word),
+      fetchTranslationData(word, synsetIds),
     ]);
 
     console.log('Dictionary data result:', dictionaryData.status);
     console.log('Synonyms data result:', synonymsData.status);
+    console.log('Translations data result:', translationsData.status);
 
     const response: LookupResponse = {};
 
@@ -108,9 +138,14 @@ export async function GET(request: NextRequest) {
       console.log('Synonyms data:', response.synonyms);
     }
 
+    if (translationsData.status === 'fulfilled') {
+      response.translations = translationsData.value;
+      console.log('Translations data:', response.translations);
+    }
+
     // エラーハンドリング - どちらか一方でも成功すればOK
-    if (dictionaryData.status === 'rejected' && synonymsData.status === 'rejected') {
-      console.error('Both dictionary and synonyms failed');
+    if (dictionaryData.status === 'rejected' && synonymsData.status === 'rejected' && translationsData.status === 'rejected') {
+      console.error('All data fetching failed');
       return NextResponse.json(
         { error: 'Failed to fetch data for the word' },
         { status: 500 }
@@ -353,6 +388,129 @@ async function fetchEnglishWordNetData(word: string): Promise<SynonymResponse> {
     synonyms: synonyms.slice(0, 15), // 最大15個の類語
     antonyms: antonyms.length > 0 ? antonyms.slice(0, 10) : undefined, // 最大10個の対義語
   };
+}
+
+// synsetIdsを取得する関数
+async function getSynsetIds(word: string): Promise<string[]> {
+  const language = detectLanguage(word);
+  const synsetIds: string[] = [];
+
+  if (language === 'japanese') {
+    // 日本語の場合：Japanese WordNetからsynsetIdを取得
+    const entries = JAPANESE_WORDNET_DB[word];
+    if (entries && entries.length > 0) {
+      entries.forEach(entry => {
+        if (!synsetIds.includes(entry.synsetId)) {
+          synsetIds.push(entry.synsetId);
+        }
+      });
+    }
+  } else {
+    // 英語の場合：OMWデータ内で直接検索
+    for (const [synsetId, synsetData] of Object.entries(OMW_DATA)) {
+      if (synsetData.en && synsetData.en.includes(word)) {
+        if (!synsetIds.includes(synsetId)) {
+          synsetIds.push(synsetId);
+        }
+      }
+    }
+    
+    // 完全一致で見つからない場合は部分一致も試行
+    if (synsetIds.length === 0) {
+      for (const [synsetId, synsetData] of Object.entries(OMW_DATA)) {
+        if (synsetData.en && synsetData.en.some(lemma => 
+          lemma.toLowerCase().includes(word.toLowerCase()) || 
+          word.toLowerCase().includes(lemma.toLowerCase())
+        )) {
+          if (!synsetIds.includes(synsetId)) {
+            synsetIds.push(synsetId);
+          }
+        }
+      }
+    }
+    
+    // 見つからない場合はDatamuseから類語を取得して再検索
+    if (synsetIds.length === 0) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5秒タイムアウト
+        
+        const response = await fetch(
+          `https://api.datamuse.com/words?rel_syn=${encodeURIComponent(word)}&max=5`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal,
+          }
+        );
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          const searchWords = data.map((item: { word: string }) => item.word);
+          
+          for (const searchWord of searchWords) {
+            for (const [synsetId, synsetData] of Object.entries(OMW_DATA)) {
+              if (synsetData.en && synsetData.en.includes(searchWord)) {
+                if (!synsetIds.includes(synsetId)) {
+                  synsetIds.push(synsetId);
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Datamuse API接続エラー（翻訳機能は継続）:', error);
+        // エラーが発生しても翻訳機能は継続（直接検索で見つかった場合は動作）
+      }
+    }
+  }
+
+  return synsetIds;
+}
+
+// 翻訳データを取得する関数
+async function fetchTranslationData(word: string, synsetIds: string[]): Promise<TranslationResponse> {
+  try {
+    const translations: Record<string, Set<string>> = {};
+    
+    // 各synsetIdから翻訳を取得
+    synsetIds.forEach(id => {
+      const langs = OMW_DATA[id];
+      if (!langs) return;
+      
+      Object.entries(langs).forEach(([lang, lemmas]) => {
+        if (!translations[lang]) translations[lang] = new Set();
+        lemmas.forEach(l => translations[lang].add(l));
+      });
+    });
+
+    // 入力言語を除外
+    const langOfInput = detectLanguage(word) === 'japanese' ? 'ja' : 'en';
+    delete translations[langOfInput];
+
+    // 配列化して最大5件に制限
+    const trimmed = Object.fromEntries(
+      Object.entries(translations).map(([lang, set]) => [
+        lang, 
+        Array.from(set).slice(0, 5)
+      ])
+    );
+
+    // 翻訳が見つからない場合のフォールバック
+    if (Object.keys(trimmed).length === 0) {
+      console.log(`翻訳が見つかりませんでした: ${word} (synsetIds: ${synsetIds.length})`);
+    } else {
+      console.log(`翻訳取得成功: ${word} -> ${Object.keys(trimmed).length}言語`);
+    }
+
+    return { word, translations: trimmed };
+  } catch (error) {
+    console.error('Translation data fetch error:', error);
+    return { word, translations: {} };
+  }
 }
 
 // Japanese WordNetから類語を取得

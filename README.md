@@ -7,6 +7,7 @@
 - **多言語対応**: 日本語と英語の両方に対応
 - **辞書検索**: 単語の詳細な意味と定義を表示
 - **類語検索**: 関連する類語と対義語を表示
+- **翻訳機能**: 30言語以上の多言語翻訳を提供
 - **自動言語判定**: 入力された単語の言語を自動判定
 - **リアルタイム検索**: 単語選択時に即座に結果を表示
 - **レスポンシブデザイン**: モバイル・デスクトップ両対応
@@ -19,6 +20,7 @@
 - **状態管理**: React Query
 - **日本語辞書**: Japanese WordNet (83,168単語)
 - **英語辞書**: Datamuse API (Open English WordNet)
+- **多言語翻訳**: Open Multilingual Wordnet (OMW)
 - **デプロイ**: Vercel
 
 ## セットアップ
@@ -44,11 +46,14 @@ npm run dev
 
 ### データセットの準備
 
-Japanese WordNetデータを自動的に処理するスクリプトが含まれています：
+Japanese WordNetデータとOMWデータを自動的に処理するスクリプトが含まれています：
 
 ```bash
-# データ処理スクリプトを実行
+# Japanese WordNetデータ処理
 node scripts/process-japanese-wordnet.js
+
+# OMWデータのダウンロードと処理
+npm run data:update
 ```
 
 ## 使用方法
@@ -63,6 +68,7 @@ node scripts/process-japanese-wordnet.js
 
 - **日本語単語**: Japanese WordNetから詳細な意味と類語を取得
 - **英語単語**: Datamuse APIから英語の類語と関連語を取得
+- **多言語翻訳**: OMWから30言語以上の翻訳を取得
 - **自動言語判定**: 入力された単語の言語を自動で判定
 - **リアルタイム検索**: 単語選択時に即座に結果を表示
 
@@ -92,6 +98,17 @@ English WordNet data provided by Datamuse API
 
 リンク先: https://api.datamuse.com/
 
+### Open Multilingual Wordnet (OMW)
+
+多言語翻訳データは[Open Multilingual Wordnet](https://github.com/omwn/omw-data)を使用しています。
+
+**ライセンス表示:**
+```
+Open Multilingual Wordnet data provided by OMW project
+```
+
+リンク先: https://github.com/omwn/omw-data
+
 ## プロジェクト構造
 
 ```
@@ -111,9 +128,11 @@ wordtree/
 │   ├── hooks/
 │   │   └── useWordLookup.ts         # 検索フック
 │   └── data/
-│       └── japanese-wordnet.json    # 処理済みJapanese WordNetデータ
+│       ├── japanese-wordnet.json    # 処理済みJapanese WordNetデータ
+│       └── multilingual-wordnet.json # 処理済みOMWデータ
 ├── scripts/
-│   └── process-japanese-wordnet.js  # データ処理スクリプト
+│   ├── process-japanese-wordnet.js  # Japanese WordNetデータ処理スクリプト
+│   └── process-omw.js               # OMWデータ処理スクリプト
 ├── data/
 │   ├── wnjpn-ok.tab                 # Japanese WordNet生データ
 │   └── wnjpn-def.tab                # 定義データ
@@ -153,6 +172,20 @@ wordtree/
   "synonyms": {
     "word": "美しい",
     "synonyms": ["きれい", "綺麗", "美麗", "華麗", "優美", "端麗"]
+  },
+  "translations": {
+    "word": "美しい",
+    "translations": {
+      "eng": ["beautiful", "lovely", "attractive"],
+      "fra": ["beau", "belle", "joli"],
+      "spa": ["hermoso", "bello", "bonito"],
+      "deu": ["schön", "hübsch"],
+      "ita": ["bello", "bellissimo"],
+      "por": ["bonito", "belo"],
+      "rus": ["красивый", "прекрасный"],
+      "cmn": ["美丽", "漂亮"],
+      "kor": ["아름다운", "예쁜"]
+    }
   }
 }
 ```
@@ -252,6 +285,10 @@ node scripts/process-japanese-wordnet.js
 
 ## 更新履歴
 
+- **v1.1.0**: 翻訳機能追加
+  - 30言語以上の多言語翻訳機能
+  - OMWデータ統合
+  - 翻訳タブUI追加
 - **v1.0.0**: 初期リリース
   - 日本語・英語辞書検索機能
   - リアルタイム検索
