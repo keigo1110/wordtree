@@ -50,72 +50,51 @@ interface WordLookupPanelProps {
   onSynonymClick?: (synonym: string) => void;
 }
 
-// 言語コードを表示名に変換する関数
-function getLanguageDisplayName(code: string): string {
-  const languageNames: Record<string, string> = {
-    // 標準的な3文字コード
-    'eng': '英語',
-    'jpn': '日本語',
-    'fra': 'フランス語',
-    'spa': 'スペイン語',
-    'deu': 'ドイツ語',
-    'ita': 'イタリア語',
-    'por': 'ポルトガル語',
-    'rus': 'ロシア語',
-    'cmn': '中国語',
-    'kor': '韓国語',
-    'nld': 'オランダ語',
-    'swe': 'スウェーデン語',
-    'dan': 'デンマーク語',
-    'nor': 'ノルウェー語',
-    'fin': 'フィンランド語',
-    'pol': 'ポーランド語',
-    'ces': 'チェコ語',
-    'slk': 'スロバキア語',
-    'hun': 'ハンガリー語',
-    'ron': 'ルーマニア語',
-    'bul': 'ブルガリア語',
-    'hrv': 'クロアチア語',
-    'srp': 'セルビア語',
-    'slv': 'スロベニア語',
-    'est': 'エストニア語',
-    'lav': 'ラトビア語',
-    'lit': 'リトアニア語',
-    'ell': 'ギリシャ語',
-    'tur': 'トルコ語',
-    'ara': 'アラビア語',
-    // 短縮形コード（実際のデータで使用されているもの）
-    'el': 'ギリシャ語',
-    'hr': 'クロアチア語',
-    'it': 'イタリア語',
-    'nl': 'オランダ語',
-    'es': 'スペイン語',
-    'en': '英語',
-    'ja': '日本語',
-    'fr': 'フランス語',
-    'de': 'ドイツ語',
-    'pt': 'ポルトガル語',
-    'ru': 'ロシア語',
-    'ko': '韓国語',
-    'sv': 'スウェーデン語',
-    'da': 'デンマーク語',
-    'no': 'ノルウェー語',
-    'fi': 'フィンランド語',
-    'pl': 'ポーランド語',
-    'cs': 'チェコ語',
-    'sk': 'スロバキア語',
-    'hu': 'ハンガリー語',
-    'ro': 'ルーマニア語',
-    'bg': 'ブルガリア語',
-    'sr': 'セルビア語',
-    'sl': 'スロベニア語',
-    'et': 'エストニア語',
-    'lv': 'ラトビア語',
-    'lt': 'リトアニア語',
-    'tr': 'トルコ語',
-    'ar': 'アラビア語'
-  };
-  return languageNames[code] || code;
+// 言語名のリスト（新しい言語名はここに追加）
+const LANGUAGE_NAMES = [
+  'Old English',
+  'Middle English',
+  'Old Norse',
+  'Old French',
+  'Proto-Germanic',
+  'Proto-Indo-European',
+  'Latin',
+  'Ancient Greek',
+  'French',
+  'German',
+  'Italian',
+  'Spanish',
+  'Portuguese',
+  'Dutch',
+  'Arabic',
+  'Sanskrit',
+  'Persian',
+  'Slavic',
+  'Celtic',
+  'Baltic',
+  'Germanic',
+  'Romance',
+  'Indo-European',
+];
+
+// 言語名を正規化する関数
+function normalizeLanguageName(text: string): string {
+  // 既知の言語名とマッチするかチェック（完全一致優先）
+  for (const langName of LANGUAGE_NAMES) {
+    if (text === langName) {
+      return langName;
+    }
+  }
+  
+  // 完全一致しない場合は部分一致を試行
+  for (const langName of LANGUAGE_NAMES) {
+    if (text.includes(langName)) {
+      return langName;
+    }
+  }
+  
+  // マッチしない場合は元のテキストを返す
+  return text.trim();
 }
 
 // 複合語の要素を抽出する関数
@@ -127,94 +106,70 @@ function extractCompoundElements(etymology: string): Array<{ word: string; meani
   
   // hēl ("health") + lā ("lo") の形式を解析
   // 特殊文字（ēなど）も含めるように正規表現を修正
-  const elementMatches = compoundInfo.match(/([a-zA-Zēāōūī]+)\s*\("([^"]+)"\)/g);
+  const elementMatches = compoundInfo.match(/(\w+)\s*\("([^"]+)"\)/g);
   
   if (!elementMatches) return [];
   
   return elementMatches.map(element => {
-    const match = element.match(/([a-zA-Zēāōūī]+)\s*\("([^"]+)"\)/);
+    const match = element.match(/(\w+)\s*\("([^"]+)"\)/);
     return match ? { word: match[1], meaning: match[2] } : null;
   }).filter((element): element is { word: string; meaning: string } => element !== null);
 }
 
-// 語源を解析して系譜を抽出する関数
-function parseEtymology(etymology: string): Array<{ 
-  language: string; 
-  word: string; 
-  meaning?: string;
-  isCompound?: boolean;
-  compoundElements?: Array<{ word: string; meaning: string }>;
-}> {
-  const lineage: Array<{ 
-    language: string; 
-    word: string; 
-    meaning?: string;
-    isCompound?: boolean;
-    compoundElements?: Array<{ word: string; meaning: string }>;
-  }> = [];
-  
-  console.log('Parsing etymology:', etymology);
-  
-  // 複合語の要素を抽出
-  const compoundElements = extractCompoundElements(etymology);
-  console.log('Compound elements:', compoundElements);
-  
-  // より確実な解析方法
-  const parts = etymology.split(',').map(part => part.trim());
-  
-  parts.forEach((part, index) => {
-    console.log(`Processing part ${index}:`, part);
-    
-    // "From Middle English visual" パターン
-    if (part.startsWith('From ')) {
-      // From の後の部分を取得し、最後の単語を実際の単語として抽出
-      const afterFrom = part.substring(5); // "From " を除去
-      const words = afterFrom.split(' ');
-      if (words.length >= 2) {
-        const actualWord = words[words.length - 1].replace(/[""]/g, '').replace(/\.$/, '');
-        const language = words.slice(0, -1).join(' ');
-        console.log(`Found From: ${language} - ${actualWord}`);
-        
-        // 複合語の情報があるかチェック
-        if (compoundElements.length > 0) {
-          lineage.push({ 
-            language, 
-            word: actualWord, 
-            isCompound: true,
-            compoundElements
-          });
+// 特別処理（compound, diminutive など）を先に抽出
+function extractSpecialEtymologyInfo(etymology: string): Array<{ word: string; meaning?: string }> {
+  // a compound of
+  if (etymology.includes('a compound of')) {
+    const match = etymology.split('a compound of')[1];
+    if (match) {
+      return match.split('+').map(part => {
+        const trimmed = part.trim();
+        const m = trimmed.match(/^(.*?)\s*\(("[^"]+"|'[^']+')\)/);
+        if (m) {
+          return { word: m[1].trim(), meaning: m[2].replace(/['"]/g, '') };
         } else {
-          lineage.push({ language, word: actualWord });
+          return { word: trimmed };
         }
+      });
+    }
+  }
+  // diminutive of
+  if (etymology.includes('diminutive of')) {
+    const match = etymology.split('diminutive of')[1];
+    if (match) {
+      const m = match.trim().match(/^(.*?)\s*\(("[^"]+"|'[^']+')\)/);
+      if (m) {
+        return [{ word: m[1].trim(), meaning: m[2].replace(/['"]/g, '') }];
+      } else {
+        return [{ word: match.trim() }];
       }
     }
-    // "from Old French visuel" パターン
-    else if (part.startsWith('from ')) {
-      // from の後の部分を取得し、最後の単語を実際の単語として抽出
-      const afterFrom = part.substring(5); // "from " を除去
-      const words = afterFrom.split(' ');
-      if (words.length >= 2) {
-        const actualWord = words[words.length - 1].replace(/[""]/g, '').replace(/\.$/, '');
-        const language = words.slice(0, -1).join(' ');
-        console.log(`Found from: ${language} - ${actualWord}`);
-        lineage.push({ language, word: actualWord });
+  }
+  return [];
+}
+
+// 語源を解析して系譜を抽出する関数
+function parseEtymology(etymology: string): Array<{ language: string; word: string }> {
+  const parts = etymology.split(',').map(p => p.trim());
+  const lineage: Array<{ language: string; word: string }> = [];
+  for (const part of parts) {
+    let text = part.replace(/^from |^From /, '').trim();
+    let found = false;
+    for (const lang of LANGUAGE_NAMES) {
+      if (text.startsWith(lang)) {
+        const word = text.slice(lang.length).replace(/^\s+/, '').replace(/\.$/, '');
+        lineage.push({ language: lang, word });
+        found = true;
+        break;
       }
     }
-  });
-  
-  console.log('Final lineage:', lineage);
-  
-  // 重複を除去
-  const uniqueLineage = lineage.filter((item, index, self) => 
-    index === self.findIndex(t => t.language === item.language && t.word === item.word)
-  );
-  
-  // 古いものから新しいものへの正しい時系列順に並び替え
-  // 語源テキストの順序: From Middle English → from Old English → from Proto-Germanic
-  // 表示順序: Proto-Germanic → Old English → Middle English → Modern English
-  const sortedLineage = [...uniqueLineage].reverse();
-  
-  return sortedLineage;
+    if (!found && text.length > 0) {
+      // 言語名が見つからない場合はそのまま追加
+      lineage.push({ language: '', word: text });
+    }
+  }
+  // 古い順から新しい順に並べる（最初が最も古い）
+  return lineage.reverse();
 }
 
 // 語源系譜図コンポーネント
@@ -235,6 +190,9 @@ function EtymologyTree({ etymology, currentWord }: { etymology: string; currentW
 
   // 複合語の要素を抽出
   const compoundElements = extractCompoundElements(etymology);
+  
+  // 特別処理の情報を抽出
+  const specialElements = extractSpecialEtymologyInfo(etymology);
 
   return (
     <div className="space-y-4">
@@ -245,8 +203,8 @@ function EtymologyTree({ etymology, currentWord }: { etymology: string; currentW
       <div className="border-l-4 border-orange-300 pl-4">
         <h5 className="text-sm font-medium text-orange-700 mb-3">語源系譜</h5>
         <div className="space-y-3">
-          {/* 複合語の要素がある場合は最初に表示 */}
-          {compoundElements.length > 0 && (
+          {/* 特別処理の要素がある場合は最初に表示 */}
+          {specialElements.length > 0 && (
             <div className="relative">
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 mt-1">
@@ -258,9 +216,10 @@ function EtymologyTree({ etymology, currentWord }: { etymology: string; currentW
                       構成要素
                     </span>
                     <span className="text-sm font-medium text-gray-900">
-                      {compoundElements.map((elem, idx) => 
-                        `${elem.word} ("${elem.meaning}")${idx < compoundElements.length - 1 ? ' + ' : ''}`
+                      {specialElements.map((elem, idx) => 
+                        `${elem.word}${elem.meaning && elem.meaning !== 'diminutive' ? ` ("${elem.meaning}")` : ''}${idx < specialElements.length - 1 ? ' + ' : ''}`
                       ).join('')}
+                      {specialElements.some(elem => elem.meaning === 'diminutive') && ' (diminutive)'}
                     </span>
                   </div>
                 </div>
@@ -290,17 +249,9 @@ function EtymologyTree({ etymology, currentWord }: { etymology: string; currentW
                     <span className="text-sm font-medium text-gray-900 truncate">
                       {item.word}
                     </span>
-                    {item.isCompound && (
-                      <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                        複合語
-                      </span>
-                    )}
+                    {/* compoundElementsはここでは表示しない */}
                   </div>
-                  {item.meaning && (
-                    <p className="text-xs text-gray-600 leading-relaxed">
-                      {item.meaning}
-                    </p>
-                  )}
+                  {/* specialElementsはここでは表示しない */}
                 </div>
               </div>
             </div>
@@ -578,7 +529,7 @@ export function WordLookupPanel({
                     <div key={lang} className={`p-2 ${index % 2 === 0 ? 'border-r border-purple-200' : ''} ${index < 2 ? 'border-b border-purple-200' : index >= Object.entries(data.translations!.translations).length - 2 ? '' : 'border-b border-purple-200'}`}>
                       <div className="flex items-center justify-between mb-1.5">
                         <h5 className="text-xs font-medium text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded-full">
-                          {getLanguageDisplayName(lang)}
+                          {normalizeLanguageName(lang)}
                         </h5>
                         <span className="text-xs text-purple-600">{lemmas.length}語</span>
                       </div>
