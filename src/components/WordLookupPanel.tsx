@@ -120,8 +120,8 @@ export function WordLookupPanel({
 }: WordLookupPanelProps) {
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
+        <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
           <h3 className="text-lg font-semibold text-gray-900">検索中...</h3>
           <button
             onClick={onClose}
@@ -130,7 +130,7 @@ export function WordLookupPanel({
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-        <div className="flex items-center justify-center py-8">
+        <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
       </div>
@@ -139,8 +139,8 @@ export function WordLookupPanel({
 
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
+        <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
           <h3 className="text-lg font-semibold text-gray-900">エラー</h3>
           <button
             onClick={onClose}
@@ -149,16 +149,18 @@ export function WordLookupPanel({
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-        <div className="text-center py-8">
-          <div className="text-red-500 mb-2">
-            <MagnifyingGlassIcon className="h-12 w-12 mx-auto mb-4" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">
+              <MagnifyingGlassIcon className="h-12 w-12 mx-auto mb-4" />
+            </div>
+            <p className="text-gray-600">
+              「{word}」の検索中にエラーが発生しました。
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              しばらく時間をおいて再度お試しください。
+            </p>
           </div>
-          <p className="text-gray-600">
-            「{word}」の検索中にエラーが発生しました。
-          </p>
-          <p className="text-sm text-gray-500 mt-2">
-            しばらく時間をおいて再度お試しください。
-          </p>
         </div>
       </div>
     );
@@ -166,8 +168,8 @@ export function WordLookupPanel({
 
   if (!data || (!data.dictionary && !data.synonyms && !data.translations)) {
     return (
-      <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
+        <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
           <h3 className="text-lg font-semibold text-gray-900">結果なし</h3>
           <button
             onClick={onClose}
@@ -176,22 +178,24 @@ export function WordLookupPanel({
             <XMarkIcon className="h-5 w-5" />
           </button>
         </div>
-        <div className="text-center py-8">
-          <div className="text-gray-400 mb-2">
-            <BookOpenIcon className="h-12 w-12 mx-auto mb-4" />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-gray-400 mb-2">
+              <BookOpenIcon className="h-12 w-12 mx-auto mb-4" />
+            </div>
+            <p className="text-gray-600">
+              「{word}」の情報が見つかりませんでした。
+            </p>
           </div>
-          <p className="text-gray-600">
-            「{word}」の情報が見つかりませんでした。
-          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg border border-gray-200">
-      {/* ヘッダー */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50">
+    <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
+      {/* ヘッダー - 固定 */}
+      <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
         <div>
           <h3 className="text-base font-semibold text-blue-900 bg-blue-100 px-2 py-0.5 rounded">{word}</h3>
           {data.dictionary?.phonetic && (
@@ -206,8 +210,8 @@ export function WordLookupPanel({
         </button>
       </div>
 
-      {/* コンテンツ - 一覧表示 */}
-      <div className="p-4 space-y-4">
+      {/* コンテンツ - スクロール可能 */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* 辞書セクション */}
         {data.dictionary && (
           <section className="space-y-2">

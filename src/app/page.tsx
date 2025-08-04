@@ -59,14 +59,14 @@ export default function Home() {
           isHistoryOpen={isHistoryOpen}
         />
         
-        <main className="flex-1 px-4 py-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
+        <main className="flex-1 px-4 py-4">
+          <div className="max-w-7xl mx-auto h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+              <div className="h-full">
                 <TextEditor onWordSelection={handleWordSelection} />
               </div>
               
-              <div>
+              <div className="h-full space-y-4">
                 {/* 検索履歴パンくずリスト */}
                 <SearchHistory
                   history={history}
