@@ -11,6 +11,13 @@ export const TextEditor = React.forwardRef<HTMLTextAreaElement, TextEditorProps>
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [value, setValue] = useState('');
 
+    const cleanSelectedWord = (text: string): string => {
+      return text
+        .replace(/[^\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uFF00-\uFFEFa-zA-Z0-9\s'-]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
     const handleMouseUp = () => {
       const textarea = textareaRef.current;
       if (!textarea) return;
@@ -19,10 +26,7 @@ export const TextEditor = React.forwardRef<HTMLTextAreaElement, TextEditorProps>
       if (selectionStart === selectionEnd) return;
       const selectedText = value.substring(selectionStart, selectionEnd).trim();
       if (selectedText && selectedText.length > 0) {
-        const cleanWord = selectedText
-          .replace(/[ -  - ]/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
+        const cleanWord = cleanSelectedWord(selectedText);
         if (cleanWord) {
           onWordSelection(cleanWord);
         }
@@ -40,7 +44,10 @@ export const TextEditor = React.forwardRef<HTMLTextAreaElement, TextEditorProps>
           if (selectionStart !== selectionEnd) {
             const selectedText = value.substring(selectionStart, selectionEnd).trim();
             if (selectedText) {
-              onWordSelection(selectedText);
+              const cleanWord = cleanSelectedWord(selectedText);
+              if (cleanWord) {
+                onWordSelection(cleanWord);
+              }
             }
           }
         }
@@ -62,6 +69,7 @@ export const TextEditor = React.forwardRef<HTMLTextAreaElement, TextEditorProps>
           ref={ref || textareaRef}
           className="h-[calc(100vh-16rem)] min-h-[300px] w-full p-6 focus:outline-none focus:ring-0 text-gray-900 leading-relaxed resize-y"
           placeholder="ここにテキストを入力またはペーストしてください..."
+          aria-label="テキスト入力"
           value={value}
           onChange={e => setValue(e.target.value)}
           onMouseUp={handleMouseUp}

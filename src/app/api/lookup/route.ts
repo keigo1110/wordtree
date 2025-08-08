@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import fs from 'fs';
 
+// 開発時のみ詳細ログを出力
+const isDev = process.env.NODE_ENV !== 'production';
+const log = (...args: Parameters<typeof console.log>) => {
+  if (isDev) console.log(...args);
+};
+
 interface DictionaryResponse {
   word: string;
   phonetic?: string;
@@ -67,7 +73,7 @@ try {
   if (fs.existsSync(dataPath)) {
     const wordnetData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
     JAPANESE_WORDNET_DB = wordnetData;
-    console.log(`Japanese WordNetデータを読み込みました: ${Object.keys(JAPANESE_WORDNET_DB).length} 単語`);
+    log(`Japanese WordNetデータを読み込みました: ${Object.keys(JAPANESE_WORDNET_DB).length} 単語`);
   } else {
     console.warn('Japanese WordNetデータファイルが見つかりません:', dataPath);
     throw new Error('Data file not found');
@@ -94,7 +100,7 @@ try {
   if (fs.existsSync(omwDataPath)) {
     const omwData = JSON.parse(fs.readFileSync(omwDataPath, 'utf8'));
     OMW_DATA = omwData;
-    console.log(`OMWデータを読み込みました: ${Object.keys(OMW_DATA).length} synsets`);
+    log(`OMWデータを読み込みました: ${Object.keys(OMW_DATA).length} synsets`);
   } else {
     console.warn('OMWデータファイルが見つかりません:', omwDataPath);
     console.log('npm run data:update を実行してデータを生成してください');
@@ -109,7 +115,7 @@ export async function GET(request: NextRequest) {
   const word = searchParams.get('word');
   const includeEtymology = searchParams.get('etymology') === 'true';
 
-  console.log('API Request received for word:', word, 'etymology:', includeEtymology);
+  log('API Request received for word:', word, 'etymology:', includeEtymology);
 
   if (!word) {
     return NextResponse.json(
@@ -119,8 +125,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    console.log('Starting lookup for word:', word);
-    console.log('Japanese WordNet DB size:', Object.keys(JAPANESE_WORDNET_DB).length);
+    log('Starting lookup for word:', word);
+    log('Japanese WordNet DB size:', Object.keys(JAPANESE_WORDNET_DB).length);
     
     // synsetIdsを取得（翻訳機能用）
     const synsetIds = await getSynsetIds(word);
@@ -132,25 +138,25 @@ export async function GET(request: NextRequest) {
       fetchTranslationData(word, synsetIds),
     ]);
 
-    console.log('Dictionary data result:', dictionaryData.status);
-    console.log('Synonyms data result:', synonymsData.status);
-    console.log('Translations data result:', translationsData.status);
+    log('Dictionary data result:', dictionaryData.status);
+    log('Synonyms data result:', synonymsData.status);
+    log('Translations data result:', translationsData.status);
 
     const response: LookupResponse = {};
 
     if (dictionaryData.status === 'fulfilled') {
       response.dictionary = dictionaryData.value;
-      console.log('Dictionary data:', response.dictionary);
+      log('Dictionary data:', response.dictionary);
     }
 
     if (synonymsData.status === 'fulfilled') {
       response.synonyms = synonymsData.value;
-      console.log('Synonyms data:', response.synonyms);
+      log('Synonyms data:', response.synonyms);
     }
 
     if (translationsData.status === 'fulfilled') {
       response.translations = translationsData.value;
-      console.log('Translations data:', response.translations);
+      log('Translations data:', response.translations);
     }
 
     // 語源情報の取得（条件付き）
@@ -158,7 +164,7 @@ export async function GET(request: NextRequest) {
       try {
         const etymologyData = await fetchEtymologyData(word);
         response.etymology = etymologyData;
-        console.log('Etymology data:', response.etymology);
+        log('Etymology data:', response.etymology);
       } catch (error) {
         console.error('Etymology fetch error:', error);
         // 語源取得に失敗しても他のデータは返す
@@ -174,7 +180,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('Final response:', response);
+    log('Final response:', response);
     return NextResponse.json(response);
   } catch (error) {
     console.error('Lookup API error:', error);

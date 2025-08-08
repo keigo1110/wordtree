@@ -34,3 +34,9 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }
+
+/* contentEditableの簡易placeholder（空のときだけ表示） */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af; /* text-gray-400 */
+}

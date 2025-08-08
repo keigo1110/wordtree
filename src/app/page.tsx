@@ -6,7 +6,6 @@ import { WordLookupPanel } from '@/components/WordLookupPanel';
 import { SearchHistory } from '@/components/SearchHistory';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { QueryProvider } from '@/components/QueryProvider';
 import { useWordLookup } from '@/hooks/useWordLookup';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 
@@ -51,7 +50,6 @@ export default function Home() {
   };
 
   return (
-    <QueryProvider>
       <div className="min-h-screen bg-gray-50 flex flex-col">
         <Header
           historyCount={history.length}
@@ -93,6 +91,5 @@ export default function Home() {
 
         <Footer />
       </div>
-    </QueryProvider>
   );
 }
