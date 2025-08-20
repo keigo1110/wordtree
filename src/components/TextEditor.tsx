@@ -18,18 +18,32 @@ export const TextEditor = React.forwardRef<HTMLTextAreaElement, TextEditorProps>
         .trim();
     };
 
-    const handleMouseUp = () => {
+    const handleSelection = () => {
       const textarea = textareaRef.current;
       if (!textarea) return;
-      const selectionStart = textarea.selectionStart;
-      const selectionEnd = textarea.selectionEnd;
-      if (selectionStart === selectionEnd) return;
-      const selectedText = value.substring(selectionStart, selectionEnd).trim();
-      if (selectedText && selectedText.length > 0) {
-        const cleanWord = cleanSelectedWord(selectedText);
-        if (cleanWord) {
-          onWordSelection(cleanWord);
+      
+      // 少し遅延を入れて選択状態を確実に取得
+      setTimeout(() => {
+        const selectionStart = textarea.selectionStart;
+        const selectionEnd = textarea.selectionEnd;
+        if (selectionStart === selectionEnd) return;
+        const selectedText = value.substring(selectionStart, selectionEnd).trim();
+        if (selectedText && selectedText.length > 0) {
+          const cleanWord = cleanSelectedWord(selectedText);
+          if (cleanWord) {
+            onWordSelection(cleanWord);
+          }
         }
+      }, 100);
+    };
+
+    const handleMouseUp = handleSelection;
+    const handleTouchEnd = handleSelection;
+    const handleTouchStart = () => {
+      // タッチ開始時にフォーカスを確実にする
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.focus();
       }
     };
 
@@ -67,12 +81,14 @@ export const TextEditor = React.forwardRef<HTMLTextAreaElement, TextEditorProps>
         </div>
         <textarea
           ref={ref || textareaRef}
-          className="h-[calc(100vh-16rem)] min-h-[300px] w-full p-6 focus:outline-none focus:ring-0 text-gray-900 leading-relaxed resize-y"
+          className="h-[calc(100vh-16rem)] min-h-[300px] w-full p-3 sm:p-6 focus:outline-none focus:ring-0 text-gray-900 leading-relaxed resize-y text-base sm:text-lg"
           placeholder="ここにテキストを入力またはペーストしてください..."
           aria-label="テキスト入力"
           value={value}
           onChange={e => setValue(e.target.value)}
           onMouseUp={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
           onKeyDown={handleKeyDown}
         />
         <div className="p-4 border-t border-gray-200 bg-gray-50">

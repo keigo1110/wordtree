@@ -25,10 +25,10 @@ export function SearchHistory({
   if (!isOpen || history.length === 0) return null;
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 mb-4">
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 sm:p-3 mb-4">
       <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center text-sm text-gray-600">
-          <ClockIcon className="h-4 w-4 mr-1" />
+        <div className="flex items-center text-xs sm:text-sm text-gray-600">
+          <ClockIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
           <span>検索履歴</span>
         </div>
         <button
@@ -41,12 +41,12 @@ export function SearchHistory({
       </div>
       <div className="relative">
         <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex items-center space-x-2 min-w-max">
+          <div className="flex items-center space-x-1 sm:space-x-2 min-w-max">
                       {history.map((item) => (
             <div key={`${item.word}-${item.timestamp}`} className="flex items-center flex-shrink-0 group">
               <button
                 onClick={() => onSelectWord(item.word)}
-                className="flex items-center space-x-1 px-2 py-1 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors group-hover:text-red-600"
+                className="flex items-center space-x-1 px-1.5 sm:px-2 py-1 text-xs sm:text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors group-hover:text-red-600"
                 title={item.word}
               >
                 <span className="font-medium">{item.word}</span>

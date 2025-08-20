@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "LexiAtlas - 単語展開ツール",
   description: "ブラウザ上で単語を選択して辞書定義・シソーラス・翻訳・語源(予定)を即座に取得できるWebアプリ",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 
 export default function RootLayout({

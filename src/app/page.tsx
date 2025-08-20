@@ -57,9 +57,9 @@ export default function Home() {
           isHistoryOpen={isHistoryOpen}
         />
         
-        <main className="flex-1 px-4 py-4">
+        <main className="flex-1 px-2 sm:px-4 py-2 sm:py-4">
           <div className="max-w-7xl mx-auto h-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 h-full">
               <div className="h-full">
                 <TextEditor onWordSelection={handleWordSelection} />
               </div>

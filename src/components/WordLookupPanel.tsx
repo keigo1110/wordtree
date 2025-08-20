@@ -363,33 +363,33 @@ export function WordLookupPanel({
   return (
     <div className="bg-white rounded-lg shadow-lg border border-gray-200 flex flex-col h-[calc(100vh-12rem)] min-h-[400px] max-h-[80vh]">
       {/* ヘッダー - 固定 */}
-      <div className="flex items-center justify-between p-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
+      <div className="flex items-center justify-between p-2 sm:p-3 border-b border-gray-200 bg-blue-50 flex-shrink-0">
         <div>
-          <h3 className="text-base font-semibold text-blue-900 bg-blue-100 px-2 py-0.5 rounded">{word}</h3>
+          <h3 className="text-sm sm:text-base font-semibold text-blue-900 bg-blue-100 px-2 py-0.5 rounded">{word}</h3>
           {data.dictionary?.phonetic && (
             <p className="text-xs text-blue-600 mt-0.5">[{data.dictionary.phonetic}]</p>
           )}
         </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-gray-400 hover:text-gray-600 transition-colors p-1"
         >
           <XMarkIcon className="h-4 w-4" />
         </button>
       </div>
 
       {/* コンテンツ - スクロール可能 */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-4 sm:space-y-6">
         {/* 辞書セクション */}
         {data.dictionary && (
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <h4 className="text-base font-semibold text-gray-900">辞書</h4>
+              <h4 className="text-sm sm:text-base font-semibold text-gray-900">辞書</h4>
             </div>
             <div className="space-y-2">
               {data.dictionary.meanings.map((meaning, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-3">
+                <div key={index} className="bg-gray-50 rounded-lg p-2 sm:p-3">
                   <div className="flex items-center mb-2">
                     <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
                       {meaning.partOfSpeech}
@@ -397,8 +397,8 @@ export function WordLookupPanel({
                   </div>
                   <div className="space-y-1.5">
                     {meaning.definitions.map((def, defIndex) => (
-                      <div key={defIndex} className="border-l-4 border-blue-200 pl-3">
-                        <p className="text-gray-900 text-sm leading-tight">{def.definition}</p>
+                      <div key={defIndex} className="border-l-4 border-blue-200 pl-2 sm:pl-3">
+                        <p className="text-gray-900 text-xs sm:text-sm leading-tight">{def.definition}</p>
                         {def.example && (
                           <p className="text-xs text-gray-600 italic mt-0.5">
                             「{def.example}」
@@ -418,16 +418,16 @@ export function WordLookupPanel({
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <h4 className="text-base font-semibold text-gray-900">類語</h4>
+              <h4 className="text-sm sm:text-base font-semibold text-gray-900">類語</h4>
             </div>
             {data.synonyms.synonyms.length > 0 ? (
-              <div className="bg-green-50 rounded-lg p-3">
-                <div className="flex flex-wrap gap-1.5">
+              <div className="bg-green-50 rounded-lg p-2 sm:p-3">
+                <div className="flex flex-wrap gap-1 sm:gap-1.5">
                   {data.synonyms.synonyms.map((synonym, index) => (
                     <button
                       key={index}
                       onClick={() => onSynonymClick?.(synonym)}
-                      className="px-3 py-1.5 bg-white text-green-700 rounded-full text-xs hover:bg-green-100 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
+                      className="px-2 sm:px-3 py-1 sm:py-1.5 bg-white text-green-700 rounded-full text-xs hover:bg-green-100 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
                       title={`「${synonym}」を検索`}
                     >
                       {synonym}
@@ -436,8 +436,8 @@ export function WordLookupPanel({
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-gray-500 text-center text-sm">類語が見つかりませんでした。</p>
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+                <p className="text-gray-500 text-center text-xs sm:text-sm">類語が見つかりませんでした。</p>
               </div>
             )}
 
@@ -446,14 +446,14 @@ export function WordLookupPanel({
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <h5 className="text-sm font-medium text-gray-900">対義語</h5>
+                  <h5 className="text-xs sm:text-sm font-medium text-gray-900">対義語</h5>
                 </div>
-                <div className="bg-red-50 rounded-lg p-3">
-                  <div className="flex flex-wrap gap-1.5">
+                <div className="bg-red-50 rounded-lg p-2 sm:p-3">
+                  <div className="flex flex-wrap gap-1 sm:gap-1.5">
                     {data.synonyms.antonyms.map((antonym, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1.5 bg-white text-red-700 rounded-full text-sm shadow-sm"
+                        className="px-2 sm:px-3 py-1 sm:py-1.5 bg-white text-red-700 rounded-full text-xs sm:text-sm shadow-sm"
                       >
                         {antonym}
                       </span>
@@ -470,11 +470,11 @@ export function WordLookupPanel({
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <h4 className="text-base font-semibold text-gray-900">翻訳</h4>
+              <h4 className="text-sm sm:text-base font-semibold text-gray-900">翻訳</h4>
             </div>
             {Object.keys(data.translations.translations).length > 0 ? (
-              <div className="bg-purple-50 rounded-lg p-3">
-                <div className="grid grid-cols-2 gap-0">
+              <div className="bg-purple-50 rounded-lg p-2 sm:p-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
                   {Object.entries(data.translations.translations)
                     .sort(([langA], [langB]) => {
                       // 英語を一番上位に配置
@@ -484,7 +484,7 @@ export function WordLookupPanel({
                       return langA.localeCompare(langB);
                     })
                     .map(([lang, lemmas], index) => (
-                    <div key={lang} className={`p-2 ${index % 2 === 0 ? 'border-r border-purple-200' : ''} ${index < 2 ? 'border-b border-purple-200' : index >= Object.entries(data.translations!.translations).length - 2 ? '' : 'border-b border-purple-200'}`}>
+                    <div key={lang} className={`p-2 ${index % 2 === 0 ? 'sm:border-r border-purple-200' : ''} ${index < 2 ? 'border-b border-purple-200' : index >= Object.entries(data.translations!.translations).length - 2 ? '' : 'border-b border-purple-200'}`}>
                       <div className="flex items-center justify-between mb-1.5">
                         <h5 className="text-xs font-medium text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded-full">
                           {normalizeLanguageName(lang)}
@@ -508,8 +508,8 @@ export function WordLookupPanel({
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-gray-500 text-center text-sm">翻訳が見つかりませんでした。</p>
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+                <p className="text-gray-500 text-center text-xs sm:text-sm">翻訳が見つかりませんでした。</p>
               </div>
             )}
           </section>
@@ -520,18 +520,18 @@ export function WordLookupPanel({
           <section className="space-y-2">
             <div className="flex items-center space-x-2 mb-2">
               <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-              <h4 className="text-base font-semibold text-gray-900">語源</h4>
+              <h4 className="text-sm sm:text-base font-semibold text-gray-900">語源</h4>
             </div>
             {data.etymology.etymology ? (
-              <div className="bg-orange-50 rounded-lg p-3">
+              <div className="bg-orange-50 rounded-lg p-2 sm:p-3">
                 <EtymologyTree etymology={data.etymology.etymology} currentWord={word} />
                 <div className="text-xs text-gray-500 border-t border-orange-200 pt-2 mt-4">
                   <span>出典: DBnary / Wiktionary (CC-BY-SA 3.0)</span>
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-gray-500 text-center text-sm">語源情報が見つかりませんでした。</p>
+              <div className="bg-gray-50 rounded-lg p-2 sm:p-3">
+                <p className="text-gray-500 text-center text-xs sm:text-sm">語源情報が見つかりませんでした。</p>
               </div>
             )}
           </section>
